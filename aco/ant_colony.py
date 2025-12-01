@@ -12,7 +12,7 @@ class AntColony:
             individual behaviour '''
         def __init__(self, start_node_pos, final_node_pos):
             self.start_pos = start_node_pos
-            self.actual_node= start_node_pos
+            self.actual_node = start_node_pos
             self.final_node = final_node_pos
             self.visited_nodes = []
             self.final_node_reached = False
@@ -36,7 +36,7 @@ class AntColony:
         def is_final_node_reached(self):
             ''' Checks if the ant has reached the
                 final destination '''
-            if self.actual_node == self.final_node :
+            if self.actual_node == self.final_node:
                 self.final_node_reached = True
 
         def enable_start_new_path(self):
@@ -49,12 +49,15 @@ class AntColony:
             ''' Clears the list of visited nodes
                 it stores the first one
                 and selects the first one as initial'''
-            self.visited_nodes[1:] =[]
-            self.actual_node= self.start_pos
+            # Keep the first visited node (start), drop the rest
+            if self.visited_nodes:
+                self.visited_nodes[1:] = []
+            else:
+                self.remember_visited_node(self.start_pos)
+            self.actual_node = self.start_pos
 
     def __init__(self, in_map, no_ants, iterations, evaporation_factor,
-                 pheromone_adding_constant, initial_pheromone=1.0, alpha=1.0, beta=2.0,
-                 override_initial_pheromone=False, max_steps=None):
+                 pheromone_adding_constant, initial_pheromone=1.0, alpha=1.0, beta=2.0, max_steps=None):
         self.map = in_map
         self.no_ants = no_ants
         self.iterations = iterations
@@ -63,7 +66,6 @@ class AntColony:
         self.initial_pheromone = initial_pheromone
         self.alpha = alpha  # pheromone influence
         self.beta = beta    # heuristic influence
-        self.override_initial_pheromone = override_initial_pheromone
         # Max steps safeguard per ant to avoid infinite loops
         if max_steps is None:
             dim = self.map.in_map.shape[0]
@@ -80,11 +82,7 @@ class AntColony:
         for row in self.map.nodes_array:
             for node in row:
                 for edge in node.edges:
-                    if self.override_initial_pheromone:
-                        edge['Pheromone'] = float(self.initial_pheromone)
-                    else:
-                        if 'Pheromone' not in edge or edge['Pheromone'] <= 0.0:
-                            edge['Pheromone'] = float(self.initial_pheromone)
+                    edge['Pheromone'] = float(self.initial_pheromone)
 
     def create_ants(self):
         ''' Creates a list containin the
@@ -96,40 +94,64 @@ class AntColony:
         return ants
 
     def _heuristic(self, dest_node):
-        ''' Heuristic: inverse Manhattan distance to goal (closer nodes -> higher value) '''
+        '''Heuristic: inverse Manhattan distance to goal (closer nodes -> higher value) '''
         dy = abs(self.map.final_node[0] - dest_node[0])
         dx = abs(self.map.final_node[1] - dest_node[1])
         dist = dx + dy
         return 1.0 / (dist + 1.0)
 
-    def select_next_node(self, actual_node):
-        ''' Randomly selects the next node using (pheromone^alpha)*(heuristic^beta) weighting '''
+    def select_next_node(self, actual_node, visited_nodes=None):
+        ''' Randomly selects the next node using (pheromone^alpha)*(heuristic^beta) weighting.
+            Prefer unvisited neighbors; if none available, allow visited ones as fallback. '''
         weights = []
         final_nodes = []
+        # First try unvisited neighbors (reduces loops)
         for edge in actual_node.edges:
-            pher = max(edge['Pheromone'], 0.0) ** self.alpha
+            if visited_nodes and edge['FinalNode'] in visited_nodes:
+                continue
+            pher = max(edge.get('Pheromone', 0.0), 0.0) ** self.alpha
             h = self._heuristic(edge['FinalNode']) ** self.beta
             weights.append(pher * h)
             final_nodes.append(edge['FinalNode'])
+        # Fallback to any neighbor if none unvisited
+        if not final_nodes:
+            for edge in actual_node.edges:
+                pher = max(edge.get('Pheromone', 0.0), 0.0) ** self.alpha
+                h = self._heuristic(edge['FinalNode']) ** self.beta
+                weights.append(pher * h)
+                final_nodes.append(edge['FinalNode'])
+        if not final_nodes:
+            return actual_node.node_pos  # no moves available
         total = sum(weights)
         if total <= 0.0:
-            # Fallback to uniform random choice if all pheromones are zero
-            return np.random.choice(final_nodes, 1)[0]
-        probs = [w/total for w in weights]
-        return np.random.choice(final_nodes, 1, p=probs)[0]
+            # fallback to uniform random choice using integer index to avoid dtype issues
+            idx = np.random.randint(len(final_nodes))
+            return final_nodes[int(idx)]
+        probs = [w / total for w in weights]
+        idx = np.random.choice(len(final_nodes), p=probs)
+        return final_nodes[int(idx)]
 
     def pheromone_update(self):
-        ''' Updates the pheromone level of each trail (evaporation + deposit) '''
-        self.sort_paths()
+        ''' Updates the pheromone level of each trail (evaporation once + deposit from paths) '''
+        # Evaporate once across all edges
+        for row in self.map.nodes_array:
+            for node in row:
+                for edge in node.edges:
+                    edge['Pheromone'] = max(edge.get('Pheromone', 0.0) * (1.0 - self.evaporation_factor), 1e-12)
+
+        # Deposit pheromones for the discovered paths
         for path in self.paths:
-            for j, element in enumerate(path):
-                for edge in self.map.nodes_array[element[0]][element[1]].edges:
-                    if (j+1) < len(path):
-                        if edge['FinalNode'] == path[j+1]:
-                            edge['Pheromone'] = (1.0 - self.evaporation_factor) * edge['Pheromone'] + \
-                                self.pheromone_adding_constant/float(len(path))
-                        else:
-                            edge['Pheromone'] = (1.0 - self.evaporation_factor) * edge['Pheromone']
+            if not path:
+                continue
+            deposit = self.pheromone_adding_constant / float(len(path))
+            for j in range(len(path) - 1):
+                current = path[j]
+                nxt = path[j + 1]
+                node = self.map.nodes_array[int(current[0])][int(current[1])]
+                for edge in node.edges:
+                    if edge['FinalNode'] == nxt:
+                        edge['Pheromone'] += deposit
+                        break
 
     def empty_paths(self):
         ''' Empty the list of paths '''
@@ -143,13 +165,13 @@ class AntColony:
         ''' Appends the path to the results path list'''
         self.paths.append(in_path)
 
-    def get_coincidence_indices(self,lst, element):
+    def get_coincidence_indices(self, lst, element):
         ''' Gets the indices of the coincidences of elements in the path '''
         result = []
         offset = -1
         while True:
             try:
-                offset = lst.index(element, offset+1)
+                offset = lst.index(element, offset + 1)
             except ValueError:
                 return result
             result.append(offset)
@@ -160,9 +182,9 @@ class AntColony:
         for element in res_path:
             coincidences = self.get_coincidence_indices(res_path, element)
             coincidences.reverse()
-            for i,coincidence in enumerate(coincidences):
-                if not i == len(coincidences)-1:
-                    res_path[coincidences[i+1]:coincidence] = []
+            for i, coincidence in enumerate(coincidences):
+                if not i == len(coincidences) - 1:
+                    res_path[coincidences[i + 1]:coincidence] = []
         return res_path
 
     def calculate_path(self):
@@ -172,7 +194,8 @@ class AntColony:
                 ant.setup_ant()
                 steps = 0
                 while not ant.final_node_reached and steps < self.max_steps:
-                    node_to_visit = self.select_next_node(self.map.nodes_array[int(ant.actual_node[0])][int(ant.actual_node[1])])
+                    node_obj = self.map.nodes_array[int(ant.actual_node[0])][int(ant.actual_node[1])]
+                    node_to_visit = self.select_next_node(node_obj, ant.get_visited_nodes())
                     ant.move_ant(node_to_visit)
                     ant.is_final_node_reached()
                     steps += 1
