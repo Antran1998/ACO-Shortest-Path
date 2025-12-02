@@ -56,8 +56,17 @@ class AntColony:
                 self.remember_visited_node(self.start_pos)
             self.actual_node = self.start_pos
 
-    def __init__(self, in_map, no_ants, iterations, evaporation_factor,
-                 pheromone_adding_constant, initial_pheromone=1.0, alpha=1.0, beta=2.0, max_steps=None):
+    def __init__(self, 
+                 in_map, 
+                 no_ants, 
+                 iterations, 
+                 evaporation_factor, 
+                 pheromone_adding_constant, 
+                 initial_pheromone=1.0, 
+                 alpha=1.0, 
+                 beta=2.0, 
+                 max_steps=None,
+                 destination_pheromone_boost=True, destination_boost_radius=2, boost_factor=2.0):
         self.map = in_map
         self.no_ants = no_ants
         self.iterations = iterations
@@ -66,6 +75,9 @@ class AntColony:
         self.initial_pheromone = initial_pheromone
         self.alpha = alpha  # pheromone influence
         self.beta = beta    # heuristic influence
+        self.destination_pheromone_boost = destination_pheromone_boost
+        self.destination_boost_radius = destination_boost_radius
+        self.boost_factor = boost_factor
         # Max steps safeguard per ant to avoid infinite loops
         if max_steps is None:
             dim = self.map.in_map.shape[0]
@@ -78,11 +90,24 @@ class AntColony:
         self.initialize_pheromones()
 
     def initialize_pheromones(self):
-        ''' Ensures every edge has an initial pheromone value; override if requested '''
+        ''' Ensures every edge has an initial pheromone value.
+            If enabled, creates a cone of pheromone leading to the destination. '''
         for row in self.map.nodes_array:
             for node in row:
                 for edge in node.edges:
-                    edge['Pheromone'] = float(self.initial_pheromone)
+                    pheromone_value = float(self.initial_pheromone)
+                    if self.destination_pheromone_boost:
+                        # Calculate Manhattan distance of the edge's destination to the final goal
+                        dy = abs(self.map.final_node[0] - edge['FinalNode'][0])
+                        dx = abs(self.map.final_node[1] - edge['FinalNode'][1])
+                        dist = dx + dy
+
+                        # Apply boost if within radius
+                        if dist <= self.destination_boost_radius:
+                            # The boost is stronger closer to the destination
+                            cone_boost = self.boost_factor * (1.0 - (dist / (self.destination_boost_radius + 1.0)))
+                            pheromone_value *= (1.0 + cone_boost)
+                    edge['Pheromone'] = pheromone_value
 
     def create_ants(self):
         ''' Creates a list containin the
@@ -207,7 +232,10 @@ class AntColony:
             if self.paths:
                 self.sort_paths()
                 candidate = self.paths[0]
-                if not self.best_result or len(candidate) < len(self.best_result):
+                # A new solution is better if it's shorter than the current best.
+                # An empty path is never a better solution.
+                is_new_solution_better = (not self.best_result or len(candidate) < len(self.best_result))
+                if candidate and is_new_solution_better:
                     self.best_result = candidate
             self.empty_paths()
             print('Iteration: ', i, ' length of current best path: ', len(self.best_result))
