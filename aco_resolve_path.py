@@ -6,13 +6,13 @@ import numpy as np
 
 # Hardcoded parameters
 ANTS = 50
-ITERATIONS = 100
+ITERATIONS = 200
 MAP_PATH = 'map3.txt'  # Adjust path relative to maps directory usage in Map class
-P = 0.2        # Adjusted evaporation for more memory of past paths
-Q = 10.0      # Pheromone addition amount
+P = 0.5        # Evaporation rate
+Q = 10.0       # Pheromone deposit amount
 DISPLAY = 1  # Set to 1 to display the map and path, 0 to disable
 ALPHA = 1.0  # Pheromone influence
-BETA = 2.0  # Heuristic influence
+BETA = 5.0   # Heuristic influence
 INITIAL_PHEROMONE = 1.0
 MAX_STEPS = None         # use default grid^2 safeguard
 
