@@ -9,7 +9,7 @@ This branch implements two main improvements based on standard ACO research pape
 
 **Formula:**
 
-$$\eta_{ij} = \frac{1}{d(i, \text{goal}) + \varepsilon}$$
+$$\eta_{ij} = \frac{1}{d(i, j) + \epsilon}$$
 
 **Implementation:**
 - Added `heuristic()` method in `aco/ant_colony.py` (line ~92-95)
@@ -17,7 +17,7 @@ $$\eta_{ij} = \frac{1}{d(i, \text{goal}) + \varepsilon}$$
 - ε (EPSILON = 1e-6) prevents division by zero
 - Used in `edge_weight()` to calculate: $(\tau^\alpha) \times (\eta^\beta)$
 
-**Purpose:** Guides ants toward the goal by favoring nodes closer to the destination
+**Purposw:** Guides ants toward the goal by favoring nodes closer to the destination
 
 ### 2. Distance-based Pheromone Update
 
@@ -26,7 +26,11 @@ $$\eta_{ij} = \frac{1}{d(i, \text{goal}) + \varepsilon}$$
 $$\tau_{ij}(t+1) = (1-\rho) \times \tau_{ij}(t) + \Delta\tau_{ij}$$
 
 Where:
-$$\Delta\tau_{ij} = \begin{cases} \frac{Q}{L_k} & \text{if } (i,j) \in \text{path}_k \\ 0 & \text{otherwise} \end{cases}$$
+
+$$\Delta\tau_{ij} = \begin{cases} 
+\dfrac{Q}{L_k} & (i,j) \in \text{path}_k \\
+0 & \text{otherwise} 
+\end{cases}$$
 
 **Implementation:**
 - `L_k` changed from **number of steps** to **total Euclidean distance** of the path
