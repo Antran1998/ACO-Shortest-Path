@@ -1,45 +1,47 @@
 # ACO_path_planning
 
 
-## Enhancements (feat/aco-base)
+## Adaptive Heuristic Factors Enhancement (feat/aco-improve2-adaptive-factors)
 
-This branch implements two main improvements based on standard ACO research papers:
+Based on feat/aco-base, this branch adds adaptive adjustment of PHF (Pheromone Heuristic Factor) and EHF (Expected Heuristic Factor) to improve convergence balance.
 
-### 1. Heuristic Function
+### Adaptive PHF & EHF
 
-**Formula:**
-```
-η_ij = 1 / (d(i, goal) + ε)
-```
-
-**Implementation:**
-- Added `heuristic()` method in `aco/ant_colony.py` (line ~92-95)
-- Uses Euclidean distance from current node to goal node
-- ε (EPSILON = 1e-6) prevents division by zero
-- Used in `edge_weight()` to calculate: (τ^α) × (η^β)
-
-### 2. Distance-based Pheromone Update
+**Solution:** Dynamic adaptation of heuristic factors based on iteration progress.
 
 **Formula:**
-```
-τ_ij(t+1) = (1-ρ) × τ_ij(t) + Δτ_ij
+
+$$\alpha'(n) = \alpha + \xi \int_0^{n/N} t \, dt = \alpha + \xi \left(\frac{n}{N}\right)^2 / 2 \quad \text{(Adaptive PHF)}$$
+
+$$\beta'(n) = \beta + \xi \int_0^{n/N} t \, dt = \beta + \xi \left(\frac{n}{N}\right)^2 / 2 \quad \text{(Adaptive EHF)}$$
 
 Where:
-Δτ_ij = Q / L_k    if edge (i,j) ∈ path_k
-Δτ_ij = 0          otherwise
+- $n$: Current iteration (0 to N-1)
+- $N$: Total iterations
+- $\xi$: Adaptive coefficient controlling adaptation speed
+
+**Implementation Details:**
+- `calculate_adaptive_factors(current_iteration)`: Computes α' and β' each iteration
+- Always uses adaptive factors in `edge_weight()` and `select_next_node()`
+- Parameter `xi` in `aco_resolve_path.py` controls sensitivity
+
+### Updated Methods
+
+**`edge_weight(edge, alpha_adaptive, beta_adaptive)`**
+- Requires adaptive factors as parameters
+- Computes: $(\tau^{\alpha'}) \times (\eta^{\beta'})$
+
+**`select_next_node(node, alpha_adaptive, beta_adaptive)`**
+- Uses current iteration's adaptive factors
+- Probabilistic selection with normalized weights
+
+### Configuration
+
+```python
+# In aco_resolve_path.py
+xi = 0.01  # Adaptive coefficient (default)
+           # ↑ Increase for faster adaptation from exploration to exploitation
+           # ↓ Decrease for slower, more gradual adaptation
 ```
 
-**Implementation:**
-- `L_k` changed from **number of steps** to **total Euclidean distance** of the path
-- Added `calculate_path_distance()` method (line ~82-90) to compute total path distance
-- Updated `pheromone_update()` method (line ~123-136) to use Euclidean distance
-
-**Purposw:** More accurate cost representation - diagonal moves cost √2 instead of 1, properly reflecting real distance
-
-### Supporting Changes
-
-**Euclidean Distance Helper:**
-- Added `calculate_euclidean_distance(pos1, pos2)` method (line ~79-83)
-- Calculates: `d = √[(x1-x2)² + (y1-y2)²]`
-- Reused by both heuristic and path distance calculations
 

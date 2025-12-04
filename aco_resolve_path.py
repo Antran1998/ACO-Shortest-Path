@@ -27,7 +27,14 @@ if __name__ == '__main__':
     #  eta^beta <- eta_ij = 1 / d_ij 
     #=======================================================
 
-    beta = 2.0   
+    beta = 2.0
+    
+    # ============ Adaptive heuristic factors ==============
+    #  alpha' = alpha + xi*Integral{[0 to n/N] t dt}    
+    #  beta' = beta + xi*Integral{[0 to n/N] t dt}
+    #=======================================================
+    
+    xi = 0.01
 
     # Get the map and run
     map_obj = Map(map_path)
@@ -38,7 +45,8 @@ if __name__ == '__main__':
                        rho, 
                        Q, 
                        alpha, 
-                       beta)
+                       beta,
+                       xi)
     
     path = Colony.calculate_path()
     print(path)

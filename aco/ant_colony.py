@@ -55,7 +55,7 @@ class AntColony:
             self.actual_node= self.start_pos
 
     def __init__(self, in_map, no_ants, iterations, evaporation_factor,
-                 pheromone_adding_constant, alpha, beta):
+                 pheromone_adding_constant, alpha, beta, xi):
         '''Initialise colony'''
         self.map = in_map
         self.no_ants = no_ants
@@ -64,6 +64,7 @@ class AntColony:
         self.pheromone_adding_constant = pheromone_adding_constant
         self.alpha = alpha
         self.beta = beta
+        self.xi = xi 
         self.paths = []
         self.ants = self.create_ants()
         self.best_result = []
@@ -76,6 +77,18 @@ class AntColony:
         for i in range(self.no_ants):
             ants.append(self.Ant(self.map.initial_node, self.map.final_node))
         return ants
+
+    def calculate_adaptive_factors(self, current_iteration):
+        '''Calculate adaptive PHF (alpha) and EHF (beta) using adaptive processing.   
+        '''      
+        # Exact integral calculation: ∫[0 to n/N] t dt = (n/N)²/2
+        integral_value = ((current_iteration / self.iterations) ** 2) / 2.0
+        
+        # Adaptive adjustment
+        alpha_adaptive = self.alpha + self.xi * integral_value
+        beta_adaptive = self.beta + self.xi * integral_value
+        
+        return alpha_adaptive, beta_adaptive
 
     def calculate_euclidean_distance(self, pos1, pos2):
         '''Calculate Euclidean distance between two positions.'''
@@ -98,20 +111,22 @@ class AntColony:
         distance = self.calculate_euclidean_distance(node_pos, self.map.final_node)
         return 1.0 / (distance + self.EPSILON)
 
-    def edge_weight(self, edge):
+    def edge_weight(self, edge, alpha_adaptive, beta_adaptive):
         '''Compute edge weight: 
-           (pheromone^alpha)*(heuristic^beta).'''
+           (pheromone^alpha_adaptive)*(heuristic^beta_adaptive).
+        '''
         pheromone = edge.get('Pheromone', 0.0)
         heuristic = self.heruistic(edge['FinalNode'])
-        return (pheromone ** self.alpha) * (heuristic ** self.beta)
+        return (pheromone ** alpha_adaptive) * (heuristic ** beta_adaptive)
 
-    def select_next_node(self, node):
+    def select_next_node(self, node, alpha_adaptive, beta_adaptive):
         '''Select next node using weighted probabilities 
-           based on pheromone and heuristic.'''
+           based on pheromone and heuristic with adaptive factors.
+        '''
         edges = node.edges
         if not edges:
             return node.node_pos
-        weights = [self.edge_weight(edge) for edge in edges]
+        weights = [self.edge_weight(edge, alpha_adaptive, beta_adaptive) for edge in edges]
         total = sum(weights)
         probs = [w / total for w in weights]
         return edges[np.random.choice(len(edges), p=probs)]['FinalNode']
@@ -180,11 +195,18 @@ class AntColony:
             get the best path '''
         # Repeat the cicle for the specified no of times
         for i in range(self.iterations):
+            # Calculate adaptive PHF and EHF for this iteration
+            alpha_adaptive, beta_adaptive = self.calculate_adaptive_factors(i)
+            
             for ant in self.ants:
                 ant.setup_ant()
                 while not ant.final_node_reached:
-                    # Randomly selection of the node to visit
-                    node_to_visit = self.select_next_node(self.map.nodes_array[int(ant.actual_node[0])][int(ant.actual_node[1])])
+                    # Randomly selection of the node to visit with adaptive factors
+                    node_to_visit = self.select_next_node(
+                        self.map.nodes_array[int(ant.actual_node[0])][int(ant.actual_node[1])],
+                        alpha_adaptive,
+                        beta_adaptive
+                    )
 
                     # Move ant to the next node randomly selected
                     ant.move_ant(node_to_visit)
