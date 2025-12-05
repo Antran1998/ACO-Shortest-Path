@@ -417,3 +417,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /env
+/smoothing_comparison.png
