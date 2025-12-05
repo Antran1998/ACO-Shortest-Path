@@ -1,34 +1,55 @@
 #!/usr/bin/env python
 
-from aco import Map, AntColony
+from aco import Map
+from aco import AntColony
 import numpy as np
-
-
-# Hardcoded parameters
-ANTS = 50
-ITERATIONS = 200
-MAP_PATH = 'map3.txt'  # Adjust path relative to maps directory usage in Map class
-P = 0.5        # Evaporation rate
-Q = 10.0       # Pheromone deposit amount
-DISPLAY = 1  # Set to 1 to display the map and path, 0 to disable
-ALPHA = 1.0  # Pheromone influence
-BETA = 5.0   # Heuristic influence
-INITIAL_PHEROMONE = 1.0
-MAX_STEPS = None         # use default grid^2 safeguard
+import sys
+import argparse
 
 
 if __name__ == '__main__':
-    # Load map
-    map_obj = Map(MAP_PATH)
-    # Create colony
-    colony = AntColony(map_obj, ANTS, ITERATIONS, P, Q,
-                       initial_pheromone=INITIAL_PHEROMONE,
-                       alpha=ALPHA, beta=BETA,
-                       max_steps=MAX_STEPS)
-    # Compute path
-    path = colony.calculate_path()
-    print('Resulting best path length:', len(path))
-    print('Best path:', path)
-    if DISPLAY > 0:
+
+    # === Senerio parameters ===
+    no_ants = 10
+    iterations = 50
+    map_path = 'map3.txt'
+    display = True
+
+    # =============== Pheromone information ================
+    #  tau^alpha <- tau_ij(t) = (1-rho) * tau_ij(t-1) + Q/L 
+    #=======================================================
+
+    rho = 0.15
+    Q = 10  
+    alpha = 1.0 
+
+    # ================== Heuristic information =============
+    #  eta^beta <- eta_ij = 1 / d_ij 
+    #=======================================================
+
+    beta = 2.0
+    
+    # ============ Adaptive heuristic factors ==============
+    #  alpha' = alpha + xi*Integral{[0 to n/N] t dt}    
+    #  beta' = beta + xi*Integral{[0 to n/N] t dt}
+    #=======================================================
+    
+    xi = 0.01
+
+    # Get the map and run
+    map_obj = Map(map_path)
+
+    Colony = AntColony(map_obj, 
+                       no_ants, 
+                       iterations, 
+                       rho, 
+                       Q, 
+                       alpha, 
+                       beta,
+                       xi)
+    
+    path = Colony.calculate_path()
+    print(path)
+    if display > 0:
         map_obj.represent_path(path)
 
