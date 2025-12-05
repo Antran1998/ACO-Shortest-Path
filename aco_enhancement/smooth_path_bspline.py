@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import splrep, splev
 
-def smooth_path_bspline(path_list, map_obj, num_samples=None):
+def smooth_path_bspline(path_list, num_samples=None):
     path_arr = np.array(path_list)
     if len(path_arr) < 3: return path_arr
     
@@ -15,7 +15,7 @@ def smooth_path_bspline(path_list, map_obj, num_samples=None):
 
     # cubic b-spline interpolation
     try:
-        tck_x = splrep(t, x, k=3, s=0.5) # s controls smoothness
+        tck_x = splrep(t, x, k=3, s=0.35) # s controls smoothness
         tck_y = splrep(t, y, k=3, s=0.5)
     except:
         return np.column_stack((x, y))
