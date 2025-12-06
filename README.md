@@ -278,7 +278,7 @@ All configurations maintain the **optimal minimum path length of 38.0 nodes**, d
 
 #### 📊 Individual Improvement Analysis
 
-**1. Cone Pheromone Initialization** ⭐ **BEST QUALITY & CONSISTENCY**
+**1. Cone Pheromone Initialization**
 - **Min Length:** 38.0 (maintains optimal)
 - **Mean Length:** 38.10 (**best mean** - only 0.26% from optimal)
 - **Consistency:** σ = 0.36 (**best std dev** - 16.3% better than base)
@@ -563,9 +563,6 @@ The enhanced ACO implementation demonstrates **significant improvements over bas
 
 ### Practical Value
 The combination of algorithmic improvements (1-4) and post-processing smoothing (5) creates a complete solution suitable for real-world robotic path planning applications requiring both optimal path quality and smooth, executable trajectories.
-
-**Recommendation:** For most applications, use **Cone Pheromone alone** for best quality and consistency, or **Mix All** when balanced performance across quality, speed, and reliability is needed.
-
 ---
 
 ## References
