@@ -11,7 +11,7 @@ from ant_colony_enhancement import AntColony
 from smooth_path_bspline import smooth_path_bspline
 
 MAP_FILE = 'map3.txt'
-RUNS = 20  # run 100 times to get average metrics
+RUNS = 100  # run 100 times to get average metrics
 
 def run_single_config(name, map_obj, use_cone_pher = False, use_adaptive_proc = False, use_div_labor = False):
     print(f" Running: {name}")
@@ -30,19 +30,10 @@ def run_single_config(name, map_obj, use_cone_pher = False, use_adaptive_proc = 
         # - Higher beta (6) for strong heuristic guidance
         # - Moderate alpha (1.0) for balanced pheromone influence
         # - Higher xi (0.5) for stronger adaptive effect
-        
-        # Adjust boost_factor based on configuration
-        if use_cone_pher:
-            # Use gentler boost for cone pheromone
-            boost_factor = 1.2
-            destination_boost_radius = None  # Auto-calculate with larger radius
-        else:
-            boost_factor = 3.0
-            destination_boost_radius = None
             
         aco = AntColony(map_obj, 
                         30,  
-                        20,  
+                        50,  
                         0.3,  
                         5.0,  
                         initial_pheromone=1.0,
@@ -51,9 +42,7 @@ def run_single_config(name, map_obj, use_cone_pher = False, use_adaptive_proc = 
                         use_cone_pheromone=use_cone_pher,
                         xi=0.5,  
                         use_adaptive_processing=use_adaptive_proc,
-                        use_division_of_labor=use_div_labor,
-                        destination_boost_radius=destination_boost_radius,
-                        boost_factor=boost_factor)
+                        use_division_of_labor=use_div_labor)
         
         path = aco.calculate_path()
         end_t = time.time()

@@ -62,9 +62,7 @@ class AntColony:
                  max_steps=None,
                  use_cone_pheromone=False,
                  use_adaptive_processing=False,
-                 use_division_of_labor=False,
-                 destination_boost_radius=None,
-                 boost_factor=3.0):
+                 use_division_of_labor=False):
         
         self.map = in_map
         self.no_ants = no_ants
@@ -85,20 +83,6 @@ class AntColony:
         self.all_features_active = (use_cone_pheromone and 
                                     use_adaptive_processing and 
                                     use_division_of_labor)
-        
-        # improved params for cone pheromone (improve 1)
-        map_dim = self.map.in_map.shape[0]
-        # Increase radius for gentler gradient - use 40-50% of map dimension
-        if destination_boost_radius is None:
-            self.destination_boost_radius = max(8, int(map_dim * 0.45))
-        else:
-            self.destination_boost_radius = destination_boost_radius
-        
-        # When all features active, use even gentler cone influence
-        if self.all_features_active:
-            self.boost_factor = min(boost_factor, 1.0)  # Further reduced from 1.5
-        else:
-            self.boost_factor = min(boost_factor, 1.5)
         
         # Track current iteration for dynamic cone strength
         self.current_iteration = 0
@@ -153,28 +137,44 @@ class AntColony:
 
     def initialize_pheromones(self):
         ''' Ensures every edge has an initial pheromone value.
-            If use_cone_pheromone is True, creates a cone distribution. '''
+            If use_cone_pheromone is True, creates a cone distribution using the formula:
+            ?? = (0.09 * |x - y|) / len + 1/d
+            where x,y are node coordinates, len is map size, d is Euclidean distance to goal.
+        '''
+        map_len = self.map.in_map.shape[0]
+        
         for row in self.map.nodes_array:
             for node in row:
                 for edge in node.edges:
-                    pheromone_value = float(self.initial_pheromone)
-                    
-                    # improve 1: cone pheromone initialization with gentler gradient
                     if self.use_cone_pheromone:
+                        # Get node coordinates
+                        node_x = edge['FinalNode'][1]  # horizontal coordinate
+                        node_y = edge['FinalNode'][0]  # vertical coordinate
+                        
+                        # Calculate Euclidean distance to target
                         dy = abs(self.map.final_node[0] - edge['FinalNode'][0])
                         dx = abs(self.map.final_node[1] - edge['FinalNode'][1])
-                        dist = math.sqrt(dx**2 + dy**2)
-
-                        if dist <= self.destination_boost_radius:
-                            # Use gentler linear decay instead of exponential
-                            # This provides guidance without overwhelming the search
-                            normalized_dist = dist / self.destination_boost_radius
-                            # Linear decay: 1.0 at goal, decreasing to 0 at radius edge
-                            cone_boost = self.boost_factor * (1.0 - normalized_dist)
-                            # Use additive boost instead of multiplicative to avoid extreme values
-                            pheromone_value += cone_boost
+                        d = math.sqrt(dx**2 + dy**2)
+                        
+                        # Improve 1: Cone pheromone formula
+                        # Term 1: (0.09 * |x - y|) / len - creates cone diffusion
+                        coordinate_diff = abs(node_x - node_y)
+                        cone_term = (0.09 * coordinate_diff) / map_len
+                        
+                        # Term 2: 1/d - enhances pheromones near target
+                        inverse_dist_term = 1.0 / (d + self.EPSILON)
+                        
+                        # Combined formula
+                        pheromone_value = cone_term + inverse_dist_term
+                        
+                        # Apply scaling based on feature combinations
+                        pheromone_value = self.initial_pheromone + pheromone_value
+                    else:
+                        pheromone_value = float(self.initial_pheromone)
                     
+                    # Initialize both Pheromone and Probability
                     edge['Pheromone'] = pheromone_value
+                    edge['Probability'] = 0.0
 
     def _heuristic(self, dest_node):
         '''Inverse Euclidean distance heuristic.'''

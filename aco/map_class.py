@@ -30,8 +30,8 @@ class Map:
                             continue
                         if (newj >= 0 and newj < jmax and newi >= 0 and newi < imax):
                             if map_arr[newi][newj] == 1:
-                                edges.append({'FinalNode': (newi, newj),
-                                              'Pheromone': 1.0, 'Probability': 0.0})
+                                # Only store topology - let algorithm handle state
+                                edges.append({'FinalNode': (newi, newj)})
             return edges
 
     def __init__(self, map_name):
