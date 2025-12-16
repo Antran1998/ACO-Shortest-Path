@@ -417,3 +417,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /env
+
+**/main.*
+!main.tex
+!main.pdf
