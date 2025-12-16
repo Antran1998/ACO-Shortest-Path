@@ -10,14 +10,14 @@ from aco.map_class import Map
 from ant_colony_enhancement import AntColony
 from smooth_path_bspline import smooth_path_bspline
 
-MAP_FILE = 'map4.txt'
+MAP_FILE = 'map1.txt'
 RUNS = 30  # paper
 NO_ANTS = 50       # Paper Table 1: Colony size = 50
 EVAPORATION = 0.15 # Paper Table 1: Evaporation rate = 0.15
 ITERATIONS = 100   # Paper: Convergence around 23-81 iterations
 INIT_PHER = 0.0001 # Paper text: Initial concentration 1e-4
 
-def run_single_config(name, map_obj, use_cone_pher=False, use_adaptive_proc=False, use_div_labor=False, use_deadlock=False): #Add use_deadlock argument for Improve 4
+def run_single_config(name, map_obj, use_cone_pher=False, use_adaptive_proc=False, use_div_labor=False, use_backtrack=False):
     print(f" Running: {name}")
     lengths = []
     times = []
@@ -45,11 +45,11 @@ def run_single_config(name, map_obj, use_cone_pher=False, use_adaptive_proc=Fals
                         beta=4.0,  # Adjusted beta for Euclidean distance logic
                         
                         # Feature Flags
-                        use_cone_pheromone=use_cone_pher,
                         xi=0.5,  
+                        use_cone_pheromone=use_cone_pher,
                         use_adaptive_processing=use_adaptive_proc,
                         use_division_of_labor=use_div_labor,
-                        use_deadlock_recovery=use_deadlock) # Improve 4 flag
+                        use_backtracking=use_backtrack)
         
         path = aco.calculate_path()
         end_t = time.time()
@@ -106,7 +106,7 @@ def main():
     results.append(run_single_config("Division of Labor", map_obj, False, False, True, False))
     
     # 5. test improve 4 (deadlock recovery only - improve 4)
-    results.append(run_single_config("Deadlock Recovery", map_obj, False, False, False, True))
+    results.append(run_single_config("Backtracking", map_obj, False, False, False, True))
 
     # 6. test improve 6 (Proposed Method: All features combined)
     # Paper Fig 3

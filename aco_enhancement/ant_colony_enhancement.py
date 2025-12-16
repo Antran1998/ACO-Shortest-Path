@@ -22,6 +22,11 @@ class AntColony:
             self.alpha = 1.0
             self.beta = 2.0
 
+            # IMPROVEMENT 4 (RENAMED): Advanced backtracking data structures
+            self.decision_stack = []  # Stack of (node, unexplored_neighbors)
+            self.backtrack_count = 0  # Track how many backtracks occurred
+            self.max_backtracks = 10  # Limit backtracks per ant to prevent infinite loops
+
         def move_ant(self, node_to_visit):
             self.actual_node = node_to_visit
             self.remember_visited_node(node_to_visit)
@@ -29,6 +34,58 @@ class AntColony:
         def remember_visited_node(self, node_pos):
             self.visited_nodes.append(node_pos)
             self.visited_set.add(node_pos)
+
+        def save_decision_point(self, current_node, all_neighbors):
+            """Save a decision point for potential backtracking"""
+            # Only save if there are multiple choices
+            unvisited = [n for n in all_neighbors if n not in self.visited_set]
+            if len(unvisited) > 1:
+                self.decision_stack.append({
+                    'node': current_node,
+                    'path_length': len(self.visited_nodes),
+                    'unexplored': set(n for n in unvisited)
+                })
+
+        def backtrack_to_decision_point(self):
+            """
+            Backtrack to the most recent decision point with unexplored options.
+            Returns the node to backtrack to, or None if no valid backtrack point.
+            """
+            while self.decision_stack:
+                decision_point = self.decision_stack[-1]
+                # Remove nodes we've already visited from unexplored set
+                decision_point['unexplored'] -= self.visited_set
+                # If this decision point has unexplored options, use it
+                if decision_point['unexplored']:
+                    # Restore path to this decision point
+                    target_length = decision_point['path_length']
+                    # Remove nodes after this decision point from visited set
+                    nodes_to_remove = self.visited_nodes[target_length:]
+                    for node in nodes_to_remove:
+                        self.visited_set.discard(node)
+                    # Truncate path
+                    self.visited_nodes = self.visited_nodes[:target_length]
+                    return decision_point['node']
+                else:
+                    # No unexplored options at this point, pop it
+                    self.decision_stack.pop()
+            return None  # No valid backtrack point found
+
+        def calculate_path_quality(self, heuristic_func):
+            """Calculate quality metric for current path direction"""
+            if not self.visited_nodes or len(self.visited_nodes) < 2:
+                return heuristic_func(self.actual_node)
+            # Combine: distance to goal + path straightness
+            goal_distance = heuristic_func(self.actual_node)
+            # Penalize zigzagging (compare last 3 moves if available)
+            straightness = 1.0
+            if len(self.visited_nodes) >= 3:
+                v1 = np.array(self.visited_nodes[-1]) - np.array(self.visited_nodes[-2])
+                v2 = np.array(self.visited_nodes[-2]) - np.array(self.visited_nodes[-3])
+                # Dot product normalized (1.0 = same direction, -1.0 = opposite)
+                if np.linalg.norm(v1) > 0 and np.linalg.norm(v2) > 0:
+                    straightness = 0.5 + 0.5 * np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+            return goal_distance * straightness
 
         def get_visited_nodes(self):
             return self.visited_nodes
@@ -49,6 +106,10 @@ class AntColony:
                 self.remember_visited_node(self.start_pos)
             self.actual_node = self.start_pos
 
+            # IMPROVEMENT 4: Reset backtracking structures
+            self.decision_stack = []
+            self.backtrack_count = 0
+
     def __init__(self, 
                  in_map, 
                  no_ants, 
@@ -63,7 +124,7 @@ class AntColony:
                  use_cone_pheromone=False,
                  use_adaptive_processing=False,
                  use_division_of_labor=False,
-                 use_deadlock_recovery=False): # improve 4
+                 use_backtracking=False):
         
         self.map = in_map
         self.no_ants = no_ants
@@ -79,7 +140,7 @@ class AntColony:
         self.use_cone_pheromone = use_cone_pheromone
         self.use_adaptive_processing = use_adaptive_processing
         self.use_division_of_labor = use_division_of_labor
-        self.use_deadlock_recovery = use_deadlock_recovery # save flag
+        self.use_backtracking = use_backtracking  # RENAMED: improve 4
         
         # detect if all features are active for parameter adjustment
         self.all_features_active = (use_cone_pheromone and 
@@ -88,9 +149,16 @@ class AntColony:
         
         # track current iteration for dynamic cone strength
         self.current_iteration = 0
-        
-        # initialize global tabu table for deadlocks (improve 4)
+
+        # IMPROVEMENT 4: Initialize global tabu table for persistent deadlocks
         self.tabu_list = set()
+
+        # IMPROVEMENT 4: Backtracking statistics
+        self.backtrack_stats = {
+            'total_backtracks': 0,
+            'successful_backtracks': 0,
+            'failed_backtracks': 0
+        }
 
         if max_steps is None:
             dim = self.map.in_map.shape[0]
@@ -175,28 +243,52 @@ class AntColony:
         return 1.0 / (distance + self.EPSILON)
 
     def select_next_node(self, actual_node, ant):
-        ''' selects next node based on role-specific logic '''
+        '''
+        Selects next node based on role-specific logic with intelligent backtracking.
+        IMPROVEMENT 4: Replaces simple deadlock recovery with multi-step backtracking.
+        '''
         weights = []
         final_nodes = []
         
-        # filter valid candidates (unvisited nodes)
+        # Get all neighbors for decision point tracking
+        all_neighbors = [edge['FinalNode'] for edge in actual_node.edges]
+
+        # IMPROVEMENT 4: Save decision point if multiple choices exist
+        if self.use_backtracking and len(all_neighbors) > 1:
+            ant.save_decision_point(ant.actual_node, all_neighbors)
+
+        # Filter valid candidates (unvisited nodes, not in tabu list)
         candidates = []
         for edge in actual_node.edges:
-
-            # improve 4: check if node is in global tabu list
-            if self.use_deadlock_recovery and edge['FinalNode'] in self.tabu_list:
+            # IMPROVEMENT 4: Check global tabu list (for persistent problematic nodes)
+            if self.use_backtracking and edge['FinalNode'] in self.tabu_list:
                 continue
                 
             if edge['FinalNode'] not in ant.visited_set:
                 candidates.append(edge)
-        
-        # if stuck, allow backtracking only if not in strict deadlock mode
-        if not candidates and not self.use_deadlock_recovery:
-            candidates = actual_node.edges
 
-        # improve 4: if still no candidates, it is a deadlock
+        # IMPROVEMENT 4: Multi-step intelligent backtracking when stuck
         if not candidates:
-            return None
+            if self.use_backtracking and ant.backtrack_count < ant.max_backtracks:
+                backtrack_node = ant.backtrack_to_decision_point()
+                if backtrack_node is not None:
+                    ant.backtrack_count += 1
+                    self.backtrack_stats['total_backtracks'] += 1
+                    return backtrack_node
+                else:
+                    # No valid backtrack point - this is a true deadlock
+                    self.backtrack_stats['failed_backtracks'] += 1
+                    self.tabu_list.add(ant.actual_node)  # Mark as problematic
+                    return None
+            elif not self.use_backtracking:
+                # Fallback: allow revisiting neighbors (old behavior)
+                candidates = actual_node.edges
+            else:
+                # Exceeded backtrack limit or true deadlock
+                return None
+
+        if not candidates:
+            return None  # Complete deadlock
 
         # soldier logic: epsilon-greedy exploration
         # use getattr to avoid attribute error
@@ -213,9 +305,16 @@ class AntColony:
             # get pheromone and heuristic values
             pher = max(edge.get('Pheromone', 0.0), 0.0) ** ant.alpha
             h = self._heuristic(edge['FinalNode']) ** ant.beta
-            
-            # apply penalty for revisiting nodes (backtracking case)
-            penalty = 1.0 if edge['FinalNode'] not in ant.visited_set else 0.1
+            # IMPROVEMENT 4: Adaptive penalty based on path quality
+            if edge['FinalNode'] not in ant.visited_set:
+                penalty = 1.0
+            else:
+                # Dynamic backtracking penalty (0.05 to 0.2 range)
+                if self.use_backtracking:
+                    current_quality = ant.calculate_path_quality(self._heuristic)
+                    penalty = 0.05 + 0.15 * current_quality
+                else:
+                    penalty = 0.1  # Fixed penalty (old behavior)
             
             weights.append(pher * h * penalty)
             final_nodes.append(edge['FinalNode'])
@@ -232,7 +331,11 @@ class AntColony:
         # roulette wheel selection
         probs = [w / total for w in weights]
         idx = np.random.choice(len(final_nodes), p=probs)
-        return final_nodes[int(idx)]
+        # IMPROVEMENT 4: Track successful backtracks
+        selected_node = final_nodes[int(idx)]
+        if self.use_backtracking and ant.backtrack_count > 0 and selected_node not in ant.visited_set:
+            self.backtrack_stats['successful_backtracks'] += 1
+        return selected_node
 
     def pheromone_update(self):
         ''' updates the pheromone level - only evaporate edges on used paths '''
@@ -309,10 +412,14 @@ class AntColony:
         execute optimized aco flow (improvement 6)
         combines cone pheromone, adaptive factors, division of labor, and deadlock recovery
         '''
-
-        # improve 4 & 6: reset tabu table at start of algorithm
-        if self.use_deadlock_recovery:
+        # IMPROVEMENT 4: Reset tabu table and backtracking stats at start
+        if self.use_backtracking:
             self.tabu_list.clear()
+            self.backtrack_stats = {
+                'total_backtracks': 0,
+                'successful_backtracks': 0,
+                'failed_backtracks': 0
+            }
 
         for i in range(self.iterations):
             self.current_iteration = i
@@ -371,13 +478,11 @@ class AntColony:
                     
                     # try to select next node
                     node_to_visit = self.select_next_node(node_obj, ant)
-                    
-                    # improve 4: deadlock handling logic
+
+                    # IMPROVEMENT 4: Deadlock handling with backtracking
                     if node_to_visit is None:
-                        if self.use_deadlock_recovery:
-                            self.tabu_list.add(ant.actual_node)
-                            deadlock_detected = True
-                        break # abandon this ant's search
+                        deadlock_detected = True
+                        break
                     
                     # standard move
                     if node_to_visit == ant.actual_node:
@@ -387,7 +492,7 @@ class AntColony:
                     ant.is_final_node_reached()
                     steps += 1
                 
-                # only store path if reached goal AND no deadlock
+                # Only store path if reached goal without deadlock
                 if ant.final_node_reached and not deadlock_detected:
                     clean_path = self.delete_loops(ant.get_visited_nodes())
                     self.add_to_path_results(clean_path)
@@ -409,6 +514,15 @@ class AntColony:
             
             # reset paths for next iteration
             self.empty_paths()
+
+        # IMPROVEMENT 4: Print backtracking statistics
+        if self.use_backtracking:
+            total = self.backtrack_stats['total_backtracks']
+            successful = self.backtrack_stats['successful_backtracks']
+            failed = self.backtrack_stats['failed_backtracks']
+            success_rate = (successful / total * 100) if total > 0 else 0
+            print(f"[Backtracking Stats] Total: {total}, Successful: {successful}, "
+                  f"Failed: {failed}, Success Rate: {success_rate:.1f}%")
             
         # return the best path found across all iterations
         if self.global_best_path:
