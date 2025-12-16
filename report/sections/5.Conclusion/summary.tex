@@ -1,0 +1,36 @@
+\section{Conclusion}
+
+This work improves Ant Colony Optimization (ACO) for grid-based path planning by introducing a set of complementary algorithmic and post-processing enhancements. The project focused on: (1) cone-shaped pheromone initialization to provide gentle directional guidance; (2) adaptive pheromone/heuristic scheduling to balance exploration and exploitation over iterations; (3) division of labor to specialise ant roles for speed and robustness; (4) controlled backtracking to recover from dead-ends; (5) B-spline smoothing to produce continuous executable trajectories; and (6) coordinated parameter fine-tuning so all features work together.
+
+Key findings
+\begin{itemize}
+  \item All proposed configurations maintain the optimal minimum path found on benchmark maps while improving secondary metrics (consistency, mean path quality, runtime) compared to the baseline.
+  \item The cone-pheromone initialization yields the best mean path length and the lowest variance across runs, making it the best single improvement for reproducible quality.
+  \item Division of labor provides the largest runtime improvement at the cost of higher variance, making it appropriate for time-critical scenarios.
+  \item The combined configuration (``Mix All'') achieves the best balance between quality, consistency and runtime, demonstrating synergy among the improvements.
+  \item B-spline smoothing converts discrete grid paths into smooth, high-density trajectories suitable for real-world motion controllers.
+\end{itemize}
+
+Limitations
+\begin{itemize}
+  \item Experiments were performed on static, known occupancy-grid maps; dynamic or partially-observed environments were not evaluated.
+  \item Parameter sensitivity remains: although coordinated tuning reduces conflicts, further automated tuning (e.g. Bayesian optimization) may improve robustness.
+  \item Low-level control and execution (actuator models, vehicle dynamics) are out of scope and require integration and validation on target platforms.
+\end{itemize}
+
+Practical recommendations
+\begin{itemize}
+  \item For quality-critical deployments (robotics, AGVs): enable cone-pheromone and Euclidean-distance fitness, apply B-spline smoothing.
+  \item For time-critical applications: enable division of labor; accept slightly higher variance for faster results.
+  \item For general use: enable the combined configuration (Mix All) with the tuned parameter set provided in the implementation notes and appendices.
+\end{itemize}
+
+Future work
+\begin{itemize}
+  \item Extend evaluation to dynamic maps and moving obstacles with online re-planning.
+  \item Integrate learning-based heuristics or learned initial pheromone fields to further reduce tuning effort.
+  \item Validate the full pipeline on a physical robot or high-fidelity simulator to measure real-world execution performance.
+  \item Add automated parameter search and multi-objective optimization (trade-off between runtime, smoothness and path length).
+\end{itemize}
+
+In summary, the presented enhancements make ACO a more practical and robust option for grid-based path planning. The modular design allows selective activation of improvements depending on application constraints (quality vs. speed), and the smoothing stage produces trajectories ready for downstream control.

@@ -1,0 +1,14 @@
+\section{Motivation}
+
+This work addresses the path planning problem on grid maps using Ant Colony Optimization (ACO). Classical ACO implementations for grid-based navigation can suffer from slow convergence, path jaggedness (unsuitable for continuous motion), and suboptimal exploitation/exploration balance. These limitations affect real-world use-cases such as mobile robot navigation, autonomous ground vehicles in structured environments, and automated guided vehicles (AGVs) in warehouses.
+
+Prior approaches include standard ACO variants, heuristic-only planners (A*, Dijkstra), and sampling-based planners (RRT, PRM). Strengths and weaknesses:
+- A* / Dijkstra: exact on discrete grids but can produce unnatural paths and do not generalize well when using learned heuristics.
+- Sampling planners: good for continuous spaces but may be inefficient in dense discrete grids.
+- Baseline ACO: good at exploring multiple candidate paths but sensitive to parameter choices and produces discrete, jagged routes.
+
+The team selected a set of complementary improvements (cone-shaped pheromone initialization, adaptive pheromone/heuristic factors, division of labor among ants, backtracking heuristics, B-spline smoothing, and coordinated parameter fine-tuning) because together they:
+1. Introduce gentle directional guidance without overconstraining exploration.
+2. Adapt search behavior during optimization to avoid premature convergence.
+3. Allow role specialization to improve search efficiency.
+4. Produce geometrically shorter, smooth, and executable trajectories suitable for real robotic platforms.
