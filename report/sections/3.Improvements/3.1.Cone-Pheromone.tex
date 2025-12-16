@@ -1,0 +1,17 @@
+\section{Cone Pheromone (Ân)}
+
+\subsection{Idea}
+Initialize pheromone distribution with a cone-shaped bias pointed toward the goal. This provides gentle directional guidance without forcing a fixed path.
+
+\subsection{Implementation}
+Compute initial pheromone for each node/edge using a combination of a normalized cone term and an inverse-distance term:
+\[
+\tau_0 = \tau_{\text{base}} + c \cdot \frac{|x-y|}{L} + \frac{1}{d}
+\]
+where $c$ is a small coefficient, $L$ is map scale and $d$ is Euclidean distance to goal.
+
+\subsection{Benefits}
+Faster convergence, lower variance across runs, maintains exploration while guiding ants toward promising regions.
+
+\subsection{Experimental results}
+Insert per-map quantitative results here: min/mean/std path length and runtime compared to baseline.

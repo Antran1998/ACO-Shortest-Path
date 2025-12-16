@@ -1,0 +1,18 @@
+\section{Adaptive Pheromone / Heuristic Factors (Như)}
+
+\subsection{Idea}
+Dynamically adapt $\alpha$ and $\beta$ during iterations to encourage exploration early and exploitation later.
+
+\subsection{Implementation}
+Use a smooth schedule (e.g. quadratic/integral schedule):
+\[
+\alpha'(n) = \alpha + \xi \left(\frac{n}{N}\right)^2/2,\quad
+\beta'(n) = \beta + \xi \left(\frac{n}{N}\right)^2/2
+\]
+Tune $\xi$ to control adaptation strength.
+
+\subsection{Benefits}
+Reduces premature convergence and balances exploration/exploitation.
+
+\subsection{Experimental results}
+Include comparison tables/plots showing effect of adaptive scheduling on path quality and variance.

@@ -1,0 +1,13 @@
+\section{Smooth Line (B-spline) (Thương)}
+
+\subsection{Idea}
+Post-process discrete grid paths using cubic B-spline interpolation to create continuous, smooth trajectories suitable for controllers.
+
+\subsection{Implementation}
+Convert grid waypoint sequence to control points, apply cubic B-spline with chosen smoothing factor and sample densely to form the final trajectory.
+
+\subsection{Benefits}
+Removes sharp corners, yields C2-continuous curves, increases point density for motion planning.
+
+\subsection{Experimental results}
+Provide before/after figures and quantitative change in curvature/point density.

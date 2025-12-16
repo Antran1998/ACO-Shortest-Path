@@ -1,0 +1,12 @@
+\section{Overview of our approach}
+
+We present a modular set of improvements designed to be composable:
+\begin{enumerate}
+  \item Cone pheromone initialization, adds directional bias toward goal.
+  \item Adaptive pheromone/heuristic factors dynamically adjust $\alpha$ and $\beta$ over iterations.
+  \item Division of labor and role assignment (explorers vs exploiters) with smooth transitions.
+  \item Backtracking heuristics  allow ants to recover from dead-ends efficiently.
+  \item Smooth-line (B-spline) post-processing convert discrete waypoint lists into continuous trajectories.
+  \item Finetune coordinated parameters so all features work together.
+\end{enumerate}
+A high-level algorithmic workflow is given, and detailed implementation notes are provided in Chapter 5.
