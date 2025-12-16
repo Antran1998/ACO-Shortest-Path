@@ -28,3 +28,4 @@ def smooth_path_bspline(path_list, num_samples=None):
     y_new = splev(t_new, tck_y)
 
     return np.column_stack((x_new, y_new))
+
