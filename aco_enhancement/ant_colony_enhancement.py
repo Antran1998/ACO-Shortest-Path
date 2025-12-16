@@ -414,3 +414,4 @@ class AntColony:
         if self.global_best_path:
             return self.global_best_path
         return self.best_result
+
