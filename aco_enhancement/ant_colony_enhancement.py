@@ -516,13 +516,13 @@ class AntColony:
             self.empty_paths()
 
         # IMPROVEMENT 4: Print backtracking statistics
-        if self.use_backtracking:
-            total = self.backtrack_stats['total_backtracks']
-            successful = self.backtrack_stats['successful_backtracks']
-            failed = self.backtrack_stats['failed_backtracks']
-            success_rate = (successful / total * 100) if total > 0 else 0
-            print(f"[Backtracking Stats] Total: {total}, Successful: {successful}, "
-                  f"Failed: {failed}, Success Rate: {success_rate:.1f}%")
+        # if self.use_backtracking:
+        #     total = self.backtrack_stats['total_backtracks']
+        #     successful = self.backtrack_stats['successful_backtracks']
+        #     failed = self.backtrack_stats['failed_backtracks']
+        #     success_rate = (successful / total * 100) if total > 0 else 0
+        #     print(f"[Backtracking Stats] Total: {total}, Successful: {successful}, "
+        #           f"Failed: {failed}, Success Rate: {success_rate:.1f}%")
             
         # return the best path found across all iterations
         if self.global_best_path:

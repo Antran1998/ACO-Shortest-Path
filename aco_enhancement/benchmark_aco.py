@@ -2,7 +2,6 @@ import sys
 import os
 # Add parent directory to path to import aco module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -17,56 +16,57 @@ EVAPORATION = 0.15 # Paper Table 1: Evaporation rate = 0.15
 ITERATIONS = 100   # Paper: Convergence around 23-81 iterations
 INIT_PHER = 0.0001 # Paper text: Initial concentration 1e-4
 
-def run_single_config(name, map_obj, use_cone_pher=False, use_adaptive_proc=False, use_div_labor=False, use_backtrack=False):
-    print(f" Running: {name}")
+METHODS = [
+    # (method_id, method_name, (O1, O2, O3, O4, O5, O6), description)
+    (1, "Basic ACO",                (False, False, False, False, False, False), "No improvements. All options off. Standard ACO."),
+    (2, "Cone Pheromone (O1)",      (True,  False, False, False, False, False), "Cone pheromone initialization (O1) only."),
+    (3, "Adaptive Heuristic (O2)",  (False, True,  False, False, False, False), "Adaptive heuristic factor (O2) only."),
+    (4, "Division of Labor (O3)",   (False, False, True,  False, False, False), "Division of labor (O3) only."),
+    (5, "Backtracking (O4)",        (False, False, False, True,  False, False), "Deadlock/backtracking (O4) only."),
+    (6, "Path Smoothing (O5)",      (False, False, False, False, True,  False), "Path smoothing (O5) only. Smoothing applied after basic ACO."),
+    (7, "New Algorithm Flow (O6)",  (False, False, False, False, False, True),  "Algorithm step optimization (O6) only."),
+    (8, "Proposed Method (Full)",   (True,  True,  True,  True,  True,  True),  "All improvements enabled (O1-O6)."),
+]
+
+def gen_tag(method_id):
+    return '' if method_id == 1 else f"m{method_id}-"
+
+def run_single_config(name, map_obj, O1, O2, O3, O4, O5, O6):
+    print(f"\nRunning: {name}")
     lengths = []
     times = []
     best_path = None
     best_length = float('inf')
-    
+    total_backtracks = 0
+    successful_backtracks = 0
+    failed_backtracks = 0
     for r in range(RUNS):
+        # Progress indicator (overwrite line)
+        print(f"  Progress: {r+1}/{RUNS}...", end='\r', flush=True)
         start_t = time.time()
-        # Optimized parameters based on ACO theory:
-        # - Moderate ant count (30 for 31x31 map) for efficiency
-        # - Higher iterations (100) for better convergence
-        # - Moderate evaporation (0.3) to balance exploration/exploitation
-        # - Lower pheromone constant (5) to avoid premature convergence
-        # - Higher beta (6) for strong heuristic guidance
-        # - Moderate alpha (1.0) for balanced pheromone influence
-        # - Higher xi (0.5) for stronger adaptive effect
-            
         aco = AntColony(map_obj, 
-                        no_ants=NO_ANTS,          # Updated to 50
+                        no_ants=NO_ANTS,
                         iterations=ITERATIONS,  
-                        evaporation_factor=EVAPORATION, # Updated to 0.15
+                        evaporation_factor=EVAPORATION, 
                         pheromone_adding_constant=10.0,  
-                        initial_pheromone=INIT_PHER,    # Updated to 0.0001
-                        alpha=1.0, # Base alpha
-                        beta=4.0,  # Adjusted beta for Euclidean distance logic
-                        
-                        # Feature Flags
+                        initial_pheromone=INIT_PHER,    
+                        alpha=1.0, 
+                        beta=4.0,  
                         xi=0.5,  
-                        use_cone_pheromone=use_cone_pher,
-                        use_adaptive_processing=use_adaptive_proc,
-                        use_division_of_labor=use_div_labor,
-                        use_backtracking=use_backtrack)
-        
+                        use_cone_pheromone=O1,
+                        use_adaptive_processing=O2,
+                        use_division_of_labor=O3,
+                        use_backtracking=O4)
         path = aco.calculate_path()
         end_t = time.time()
-        
         if path:
-            # Use Euclidean distance instead of node count (len)
-            # This is crucial for scientific accuracy with diagonal movement
             path_len = aco.calculate_path_distance(path)
-            
             lengths.append(path_len)
             times.append(end_t - start_t)
-            
-            # Track the best path
             if path_len < best_length:
                 best_length = path_len
                 best_path = path
-            
+
     return {
         "name": name,
         "mean_len": np.mean(lengths) if lengths else float('inf'),
@@ -76,103 +76,171 @@ def run_single_config(name, map_obj, use_cone_pher=False, use_adaptive_proc=Fals
         "best_path": best_path
     }
 
-def main():
+def load_map(map_file):
     try:
-        map_obj = Map(MAP_FILE)
+        map_obj = Map(map_file)
     except FileNotFoundError:
-        print(f"Error: Map file not found at maps/{MAP_FILE}")
-        return
-    
-    # Start node + gold node
-    start_node = map_obj.initial_node
-    goal_node = map_obj.final_node
-    print(f"Map Loaded: {MAP_FILE}")
-    print(f"Start Node: {start_node} (Row, Col)")
-    print(f"Goal Node : {goal_node} (Row, Col)")
+        print(f"Error: Map file not found at maps/{map_file}")
+        return None
+    return map_obj
 
-    results = []
+def prompt_method_selection(methods):
+    print("\nSelect method to benchmark:")
+    for m in methods:
+        print(f"  {m[0]}: {m[1]} - {m[3]}")
+    while True:
+        try:
+            mode = int(input(f"Enter the number corresponding to the method you want to run (1-{len(methods)}): "))
+            if mode in range(1, len(methods)+1):
+                return mode
+            else:
+                print(f"Invalid input. Please enter a number from 1 to {len(methods)}.")
+        except ValueError:
+            print(f"Invalid input. Please enter a number from 1 to {len(methods)}.")
 
-    # 1. test base ACO (no improvements)
-    # Args: cone, adaptive, division, deadlock
-    results.append(run_single_config("Base ACO", map_obj, False, False, False, False))
-
-    # 2. test improve 1 (cone pheromone only - improve 1)
-    results.append(run_single_config("Cone Pheromone", map_obj, True, False, False, False))
-
-    # 3. test improve 2 (Adaptive pheromone - improve 2)
-    results.append(run_single_config("Adaptive Processing", map_obj, False, True, False, False))
-
-    # 4. test improve 3 (division of labor only - improve 3)
-    results.append(run_single_config("Division of Labor", map_obj, False, False, True, False))
-    
-    # 5. test improve 4 (deadlock recovery only - improve 4)
-    results.append(run_single_config("Backtracking", map_obj, False, False, False, True))
-
-    # 6. test improve 6 (Proposed Method: All features combined)
-    # Paper Fig 3
-    results.append(run_single_config("Proposed Method", map_obj, True, True, True, True))
-
-    # print benchmark results table
-    print("\n" + "-"*85)
-    print(f"{'Algorithm':<20} | {'Min Len':<10} | {'Mean Len':<15} | {'Time (s)':<10}")
-    print("-" * 85)
+def print_results_table(results):
+    print("\n" + "-"*70)
+    print(f"{'Algorithm':<20} | {'Mean Len':<15} | {'Time (s)':<10}")
+    print("-" * 70)
     for res in results:
-        print(f"{res['name']:<20} | {res['min_len']:<10.2f} | {res['mean_len']:<7.2f} ± {res['std_len']:<5.2f} | {res['mean_time']:<10.3f}")
-    print("-"*85)
+        print(f"{res['name']:<20} | {res['mean_len']:<7.2f} ± {res['std_len']:<5.2f} | {res['mean_time']:<10.3f}")
+    print("-"*70)
 
-    # test improve 5 (smoothing)
-    print("\n>>> Testing Improve 5 (Smoothing) on Best Path from Proposed Method...")
-    
-    # Get the best path from the Proposed Method configuration
-    proposed_result = results[-1]  # Last result is Proposed Method
-    raw_path = proposed_result["best_path"]
-    
-    if raw_path:
-        # convert coords (row, col) to (x, y)
-        path_y = [p[0] for p in raw_path]
-        path_x = [p[1] for p in raw_path]
+def save_stats_table(result_dir, map_base, method_file, tag, method_id, method_name, method_desc, results):
+    stat_filename = f"stat-{map_base}-{tag}{method_file}.txt"
+    stat_path = os.path.join(result_dir, stat_filename)
+    with open(stat_path, 'w', encoding='utf-8') as f:
+        f.write(f"Method {method_id}: {method_name}\n{method_desc}\n\n")
+        f.write("-"*70 + "\n")
+        f.write(f"{'Algorithm':<20} | {'Mean Len':<15} | {'Time (s)':<10}\n")
+        f.write("-" * 70 + "\n")
+        for res in results:
+            f.write(f"{res['name']:<20} | {res['mean_len']:<7.2f} ± {res['std_len']:<5.2f} | {res['mean_time']:<10.3f}\n")
+        f.write("-"*70 + "\n")
+
+def recalc_stats_with_smoothing(results):
+    """
+    Recalculate mean_len, std_len, mean_time based on the smoothed (B-Spline) path.
+    mean_time = original mean_time (finding best path) + smoothing time.
+    """
+    from smooth_path_bspline import smooth_path_bspline
+    import numpy as np
+    import time
+    for res in results:
+        best_path = res.get('best_path')
+        if best_path is not None:
+            # Convert (row, col) to (x, y)
+            path_y = [p[0] for p in best_path]
+            path_x = [p[1] for p in best_path]
+            path_xy = list(zip(path_x, path_y))
+            # Measure smoothing time
+            t0 = time.time()
+            smooth_path = smooth_path_bspline(path_xy)
+            t1 = time.time()
+            smooth_time = t1 - t0
+            # Calculate smoothed path length
+            smooth_len = 0
+            for i in range(len(smooth_path)-1):
+                smooth_len += np.sqrt((smooth_path[i+1][0]-smooth_path[i][0])**2 + (smooth_path[i+1][1]-smooth_path[i][1])**2)
+            res['mean_len'] = smooth_len
+            res['std_len'] = 0
+            res['mean_time'] = res.get('mean_time', 0) + smooth_time
+    return results
+
+def save_discrete_path_plot(result_dir, map_base, method_file, tag, method_name, min_len, best_path, map_obj, start_node, goal_node):
+    path_y = [p[0] for p in best_path]
+    path_x = [p[1] for p in best_path]
+    plt.figure(figsize=(10, 10))
+    plt.imshow(map_obj.occupancy_map, cmap='gray', origin='upper')
+    plt.plot(path_x, path_y, 'r--', linewidth=2, label=method_name+' (Discrete)')
+    plt.plot(start_node[1], start_node[0], 'bo', markersize=10, label='Start')
+    plt.plot(goal_node[1], goal_node[0], 'r*', markersize=15, label='Goal')
+    plt.legend()
+    plt.title(f"{method_name} - Discrete Path (Len: {min_len:.2f})")
+    img_filename = f"visu-{map_base}-{tag}{method_file}.png"
+    img_path = os.path.join(result_dir, img_filename)
+    plt.savefig(img_path, dpi=300)
+    plt.close()
+
+def save_smoothed_path_plot(result_dir, map_base, method_file, tag, method_name, min_len, best_path, map_obj, start_node, goal_node):
+    print(f"\n>>> Testing Path Smoothing on Best Path from {method_name}...")
+    if not best_path:
+        print(f"[WARN] No path found for smoothing. raw_path={best_path}")
+        return
+    print(f"[DEBUG] raw_path found, length: {len(best_path)}")
+    try:
+        path_y = [p[0] for p in best_path]
+        path_x = [p[1] for p in best_path]
         path_xy = list(zip(path_x, path_y))
-        
-        # apply smoothing function
         smooth_path = smooth_path_bspline(path_xy)
-        
-        # Calculate length for smooth path for comparison
         smooth_len = 0
         for i in range(len(smooth_path)-1):
-             smooth_len += np.sqrt((smooth_path[i+1][0]-smooth_path[i][0])**2 + 
-                                   (smooth_path[i+1][1]-smooth_path[i][1])**2)
-        
-        print(f"Original Length: {proposed_result['min_len']:.2f}")
+            smooth_len += np.sqrt((smooth_path[i+1][0]-smooth_path[i][0])**2 + \
+                                  (smooth_path[i+1][1]-smooth_path[i][1])**2)
+        print(f"Original Length: {min_len:.2f}")
         print(f"Smoothed Length: {smooth_len:.2f}")
-        
-        # plot and save figure
         plt.figure(figsize=(10, 10))
-        
-        # plot map background
         plt.imshow(map_obj.occupancy_map, cmap='gray', origin='upper')
-        
-        # plot original path (red dashed)
-        plt.plot(path_x, path_y, 'r--', linewidth=1.5, label='Proposed (Discrete)')
-        
-        # plot smoothed b-spline path (green solid)
+        plt.plot(path_x, path_y, 'r--', linewidth=1.5, label=method_name+' (Discrete)')
         plt.plot(smooth_path[:, 0], smooth_path[:, 1], 'g-', linewidth=2.5, label='B-Spline (Smoothed)')
-        
-        # plot start/goal points
         plt.plot(start_node[1], start_node[0], 'bo', markersize=10, label='Start')
         plt.plot(goal_node[1], goal_node[0], 'r*', markersize=15, label='Goal')
-        
         plt.legend()
-        plt.title(f"Improve 5: Path Smoothing (Len: {proposed_result['min_len']:.2f} -> {smooth_len:.2f})")
-        plt.xlabel("X (Column)")
-        plt.ylabel("Y (Row)")
+        plt.title(f"{method_name} - Path Smoothing (Len: {min_len:.2f} -> {smooth_len:.2f})")
+        img_filename = f"visu-{map_base}-{tag}{method_file}.png"
+        img_path = os.path.join(result_dir, img_filename)
+        print(f"[DEBUG] Saving PNG to: {img_path}")
+        plt.savefig(img_path, dpi=300)
+        print(f"\n[INFO] Comparison chart saved to file: {img_path}")
+        plt.close()
+    except Exception as e:
+        print(f"[ERROR] Exception during PNG save: {e}")
 
-        # save to file
-        plt.savefig('smoothing_comparison.png', dpi=300)
-        print("\n[INFO] Comparison chart saved to file: smoothing_comparison.png")
-        
-        plt.show()
-    else:
-        print("[WARN] No path found for Proposed Method. Cannot apply smoothing.")
+def initialize_map():
+    map_obj = load_map(MAP_FILE)
+    if map_obj is None:
+        return None
+    map_shape = map_obj.in_map.shape if hasattr(map_obj, 'in_map') else (None, None)
+    print(f"Loaded map: {MAP_FILE} | Size: {map_shape[0]}x{map_shape[1]}")
+    return map_obj
+
+def get_start_and_goal_nodes(map_obj):
+    return map_obj.initial_node, map_obj.final_node
+
+def select_method(methods):
+    mode = prompt_method_selection(methods)
+    method_id, method_name, flags, method_desc = methods[mode-1]
+    return method_id, method_name, flags, method_desc
+
+def execute_selected_method(method_name, map_obj, flags):
+    O1, O2, O3, O4, O5, O6 = flags
+    return [run_single_config(method_name, map_obj, O1, O2, O3, O4, O5, O6)]
+
+def output_results(map_file, method_id, method_name, method_desc, results, map_obj, start_node, goal_node, flags):
+    print_results_table(results)
+    result_dir = os.path.join(os.path.dirname(__file__), '..', 'result')
+    os.makedirs(result_dir, exist_ok=True)
+    map_base = os.path.splitext(os.path.basename(map_file))[0]
+    method_file = method_name.replace(' ', '_').replace('(', '').replace(')', '').replace('-', '').lower()
+    tag = gen_tag(method_id)
+    save_stats_table(result_dir, map_base, method_file, tag, method_id, method_name, method_desc, results)
+    best_path = results[-1]["best_path"]
+    O5 = flags[4]
+    if best_path and not O5:
+        save_discrete_path_plot(result_dir, map_base, method_file, tag, method_name, results[-1]['min_len'], best_path, map_obj, start_node, goal_node)
+    elif not best_path:
+        print("[WARN] No best path found to visualize for this method.")
+    if O5:
+        save_smoothed_path_plot(result_dir, map_base, method_file, tag, method_name, results[-1]['min_len'], best_path, map_obj, start_node, goal_node)
+
+def main():
+    map_obj = initialize_map()
+    if map_obj is None:
+        return
+    start_node, goal_node = get_start_and_goal_nodes(map_obj)
+    method_id, method_name, flags, method_desc = select_method(METHODS)
+    results = execute_selected_method(method_name, map_obj, flags)
+    output_results(MAP_FILE, method_id, method_name, method_desc, results, map_obj, start_node, goal_node, flags)
 
 if __name__ == '__main__':
     main()
