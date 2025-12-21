@@ -1,9 +1,6 @@
 \section{Scope}
+This report is deliberately focused: we study algorithmic refinements to ACO for static, fully-known occupancy-grid maps and evaluate them in an offline, repeatable benchmarking setting. The maps used are the project's local `maps/` collection together with a chosen set of public benchmarks to ensure that results can be reproduced and compared.
 
-This report focuses on algorithmic improvements to ACO for static, known grid maps. The work:
-\begin{itemize}
-  \item Targets offline path planning and benchmark evaluation (no online dynamic re-planning).
-  \item Uses occupancy-grid style maps provided in the project's maps/ folder.
-  \item Evaluates improvements by numerical experiments (multiple runs) on benchmark maps.
-  \item Does not address sensor noise, moving obstacles, or low-level control execution.
-\end{itemize}
+The work concentrates on planner-level contributions such as search guidance, pheromone and heuristic adaptation, role specialization among ants, targeted backtracking, and B-spline smoothing as a post-processing step. We do not attempt to solve state estimation, sensor noise modelling, online dynamic re-planning, kinodynamic trajectory optimization, or low-level controller integration; these topics are outside the scope of this report, though the produced trajectories are designed to be compatible with downstream controllers.
+
+Key assumptions and limitations are as follows. Maps are treated as static and fully observed, so the findings do not directly generalize to dynamic or partially-observed environments. Performance comparisons are made via offline metrics and aggregated statistics; absolute wall-clock numbers will depend on implementation and hardware but relative trends are valid when measured on the same platform. Finally, smoothing is applied as a post-processing stage—detailed dynamics-aware trajectory optimization is left for future work.
