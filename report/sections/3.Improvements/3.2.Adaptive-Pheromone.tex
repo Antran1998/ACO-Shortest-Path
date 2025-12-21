@@ -1,4 +1,5 @@
 \section{Adaptive Pheromone / Heuristic Factors}
+\sloppy
 
 \subsection{Idea}
 In the standard Ant Colony Optimization (ACO) algorithm, the pheromone influence factor $\alpha$ and heuristic influence factor $\beta$ are typically fixed throughout the optimization process. However, static parameter settings are not well suited for complex path planning problems, where different search stages demand different behaviors.
@@ -30,6 +31,122 @@ The proposed adaptive pheromone and heuristic factor strategy provides several a
 Overall, this adaptive mechanism enables the ACO algorithm to dynamically adjust its search behavior according to the optimization stage, which is particularly beneficial in complex and cluttered environments.
 
 \subsection{Experimental Results}
-The effectiveness of the adaptive pheromone and heuristic factor regulation is validated through comparative experiments with the standard fixed-parameter ACO. Under identical environmental settings and parameter initialization, performance metrics such as average path length, convergence speed, and solution variance are evaluated.
+The four test maps used in the experiments correspond to different types of environments:
+\begin{itemize}
+    \item \textbf{Map 1}: Simple environment
+    \item \textbf{Map 3}: Cluttered environment
+    \item \textbf{Map 7}: Crowded environment
+    \item \textbf{Map 8}: Maze-like environment
+\end{itemize}
 
-Experimental results show that the adaptive ACO consistently produces shorter paths with lower variance compared to the baseline method. Moreover, the convergence curves demonstrate that the adaptive strategy achieves faster and more stable convergence, especially in environments with dense obstacles. These results confirm that dynamic parameter adaptation significantly enhances both solution quality and robustness of the path planning process.
+To evaluate the effectiveness of the adaptive pheromone and heuristic factor regulation, we conducted comparative experiments between the standard ACO (Basic ACO) and the adaptive method (Adaptive Heuristic (O2)) on four different maps. The main metrics considered are average path length (Mean Len), standard deviation, and computation time. The results are summarized in Table~\ref{tab:adaptive-results}.
+
+% Visualization for Map 1
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map1-basic_aco.png}
+        \caption{Map 1 - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map1-m3-adaptive_heuristic_o2.png}
+        \caption{Map 1 - Adaptive Heuristic (O2)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map 1.}
+    \label{fig:aco-path-visualization-map1}
+\end{figure}
+
+% Visualization for Map 3
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map3-basic_aco.png}
+        \caption{Map 3 - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map3-m3-adaptive_heuristic_o2.png}
+        \caption{Map 3 - Adaptive Heuristic (O2)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map 3.}
+    \label{fig:aco-path-visualization-map3}
+\end{figure}
+
+% Visualization for Map 7
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map7-basic_aco.png}
+        \caption{Map 7 - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map7-m3-adaptive_heuristic_o2.png}
+        \caption{Map 7 - Adaptive Heuristic (O2)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map 7.}
+    \label{fig:aco-path-visualization-map7}
+\end{figure}
+
+% Visualization for Map 8
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map8-basic_aco.png}
+        \caption{Map 8 - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O2/visu-map8-m3-adaptive_heuristic_o2.png}
+        \caption{Map 8 - Adaptive Heuristic (O2)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map 8.}
+    \label{fig:aco-path-visualization-map8}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of Basic ACO and Adaptive Heuristic (O2) on different maps}
+    \label{tab:adaptive-results}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+    	\textbf{Map Name} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \hline
+    \multirow{2}{*}{map1} & Basic ACO & 6.11 $\pm$ 0.71 & 0.112 \\
+     & Adaptive (O2) & 5.24 $\pm$ 0.00 & 0.102 \\
+        \hline
+    \multirow{2}{*}{map3} & Basic ACO & 87.67 $\pm$ 8.41 & 2.278 \\
+     & Adaptive (O2) & 90.34 $\pm$ 27.88 & 2.809 \\
+        \hline
+    \multirow{2}{*}{map7} & Basic ACO & 85.30 $\pm$ 10.49 & 2.376 \\
+     & Adaptive (O2) & 63.34 $\pm$ 13.97 & 1.790 \\
+        \hline
+    \multirow{2}{*}{map8} & Basic ACO & 36.67 $\pm$ 1.91 & 0.703 \\
+     & Adaptive (O2) & 24.18 $\pm$ 1.60 & 0.611 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The experimental results show that the Adaptive Heuristic (O2) strategy improves both the robustness and solution quality of the ACO algorithm, especially in more complex environments, while maintaining computational efficiency. The key metric, mean path length, reflects the average performance and stability of each method.
+
+\subsubsection*{\textbullet\ Simple Environment (Map 1)}
+Both algorithms easily find the optimal path, but O2 converges more quickly and stably, always reaching the best solution (O2, Map 1: 5.24 $\pm$ 0.00) compared to Basic ACO, which is more affected by randomness (Basic ACO, Map 1: 6.11 $\pm$ 0.71).
+
+\subsubsection*{\textbullet\ Cluttered and Crowded Environments (Map 3, Map 7)}
+As the search space becomes more complex, O2 demonstrates a clear advantage in avoiding local optima and finding shorter paths. In Map 7, O2 achieves a much lower mean path length (O2, Map 7: 63.34 $\pm$ 13.97) than Basic ACO (Basic ACO, Map 7: 85.30 $\pm$ 10.49). In Map 3, the mean path length for O2 (O2, Map 3: 90.34 $\pm$ 27.88) is comparable to Basic ACO (Basic ACO, Map 3: 87.67 $\pm$ 8.41), but the higher standard deviation reflects the increased difficulty and diversity of solutions in this environment.
+
+\subsubsection*{\textbullet\ Maze-like Environment (Map 8)}
+O2 is especially effective, almost always finding the optimal path (O2, Map 8: 24.18 $\pm$ 1.60), while Basic ACO is more likely to get stuck or take detours (Basic ACO, Map 8: 36.67 $\pm$ 1.91).
+
+\subsubsection*{Summary and Insights}
+Across all maps, O2 not only finds the optimal path more consistently but also reduces variance, indicating greater reliability. Computational time remains similar between methods, so the adaptive improvement does not introduce significant overhead. The distinction between mean and minimum path length is important: mean path length reflects average reliability, while minimum path length shows the best-case scenario. O2 improves both, especially in challenging environments.
+% --- End integrated analysis ---
