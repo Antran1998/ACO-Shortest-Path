@@ -6,8 +6,39 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from aco.map_class import Map
-from ant_colony_enhancement import AntColony
 from smooth_path_bspline import smooth_path_bspline
+
+
+from importlib import import_module
+
+# Select appropriate AntColony class based on method 
+def get_ant_colony_instance(name, map_obj, O1, O2, O3, O4, O5, O6):
+    if name.lower().startswith("basic aco"):
+        AntColonyClass = import_module("aco.ant_colony").AntColony
+        return AntColonyClass(map_obj, 
+                             no_ants=NO_ANTS,
+                             iterations=ITERATIONS,  
+                             evaporation_factor=EVAPORATION, 
+                             pheromone_adding_constant=10.0,  
+                             alpha=1.0, 
+                             beta=4.0,  
+                             xi=0.5,
+                             initial_pheromone=INIT_PHER)
+    else:
+        AntColonyClass = import_module("aco_enhancement.ant_colony_enhancement").AntColony
+        return AntColonyClass(map_obj, 
+                             no_ants=NO_ANTS,
+                             iterations=ITERATIONS,  
+                             evaporation_factor=EVAPORATION, 
+                             pheromone_adding_constant=10.0,  
+                             initial_pheromone=INIT_PHER,    
+                             alpha=1.0, 
+                             beta=4.0,  
+                             xi=0.5,  
+                             use_cone_pheromone=O1,
+                             use_adaptive_processing=O2,
+                             use_division_of_labor=O3,
+                             use_backtracking=O4)
 
 MAP_FILE = 'map1.txt'
 RUNS = 30  # paper
@@ -37,26 +68,11 @@ def run_single_config(name, map_obj, O1, O2, O3, O4, O5, O6):
     times = []
     best_path = None
     best_length = float('inf')
-    total_backtracks = 0
-    successful_backtracks = 0
-    failed_backtracks = 0
     for r in range(RUNS):
         # Progress indicator (overwrite line)
         print(f"  Progress: {r+1}/{RUNS}...", end='\r', flush=True)
         start_t = time.time()
-        aco = AntColony(map_obj, 
-                        no_ants=NO_ANTS,
-                        iterations=ITERATIONS,  
-                        evaporation_factor=EVAPORATION, 
-                        pheromone_adding_constant=10.0,  
-                        initial_pheromone=INIT_PHER,    
-                        alpha=1.0, 
-                        beta=4.0,  
-                        xi=0.5,  
-                        use_cone_pheromone=O1,
-                        use_adaptive_processing=O2,
-                        use_division_of_labor=O3,
-                        use_backtracking=O4)
+        aco = get_ant_colony_instance(name, map_obj, O1, O2, O3, O4, O5, O6)
         path = aco.calculate_path()
         end_t = time.time()
         if path:
@@ -167,7 +183,6 @@ def save_smoothed_path_plot(result_dir, map_base, method_file, tag, method_name,
     if not best_path:
         print(f"[WARN] No path found for smoothing. raw_path={best_path}")
         return
-    print(f"[DEBUG] raw_path found, length: {len(best_path)}")
     try:
         path_y = [p[0] for p in best_path]
         path_x = [p[1] for p in best_path]
@@ -189,9 +204,7 @@ def save_smoothed_path_plot(result_dir, map_base, method_file, tag, method_name,
         plt.title(f"{method_name} - Path Smoothing (Len: {min_len:.2f} -> {smooth_len:.2f})")
         img_filename = f"visu-{map_base}-{tag}{method_file}.png"
         img_path = os.path.join(result_dir, img_filename)
-        print(f"[DEBUG] Saving PNG to: {img_path}")
         plt.savefig(img_path, dpi=300)
-        print(f"\n[INFO] Comparison chart saved to file: {img_path}")
         plt.close()
     except Exception as e:
         print(f"[ERROR] Exception during PNG save: {e}")
