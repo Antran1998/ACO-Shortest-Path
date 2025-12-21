@@ -1,9 +1,33 @@
-\section{Dataset / Benchmark maps (Ân)}
+\section{Dataset / Benchmark maps}
 
-Describe the benchmark maps used for evaluation:
+We evaluate on the set of benchmark maps provided in the project repository (see the \texttt{maps/} folder). The benchmark collection contains several ASCII grid maps (e.g. \texttt{maps/map1.txt} through \texttt{maps/map5.txt}) used throughout the experiments in this work. Each map encodes free space, obstacles, and the task endpoints in a compact, human-readable format.
+
+Map format and parsing:
 \begin{itemize}
-  \item Source: project maps in the repository (e.g. \texttt{maps/map1.txt}, \texttt{maps/map2.txt}, \texttt{maps/map3.txt}).
-  \item Map format: ASCII grid with markers: \texttt{S} (start), \texttt{F} (goal), \texttt{E} (empty/free), \texttt{O} (obstacle).
-  \item Evaluation protocol: run each configuration multiple times (e.g. 20 runs), record min/mean/std of path length (Euclidean), runtime, and success rate.
-  \item Preprocessing: conversion to occupancy map and node graph (diagonal connectivity allowed when free).
+  \item \textbf{Representation:} Each map is an ASCII grid where each cell contains one of the following markers: \texttt{S} (start), \texttt{F} (goal/finish), \texttt{E} (empty / free cell), and \texttt{O} (obstacle).
+  \item \textbf{Grid interpretation:} The grid rows correspond to the map's $y$ axis and columns to the $x$ axis; cells are square and implicitly unit-spaced. Coordinates are taken at cell centers when converting to continuous space for distance calculations.
+  \item \textbf{Preprocessing:} For each map we construct an occupancy grid and then build a node graph for planning. Nodes correspond to free cells; connectivity follows an 8-neighbour scheme (i.e. diagonal moves are allowed) but edges that would cross obstacle cells are omitted to preserve obstacle integrity. Edge costs are set to the Euclidean distance between node centers.
 \end{itemize}
+
+Evaluation protocol and metrics:
+\begin{itemize}
+  \item \textbf{Repetitions:} Each algorithm/configuration is executed multiple times per map to capture stochastic variability. In the experiments reported in this paper we used \texttt{RUNS=30} (see the benchmarking script \texttt{aco\_enhancement/benchmark\_aco.py}).
+  \item \textbf{Recorded metrics:} For each run we record whether a feasible path from \texttt{S} to \texttt{F} was found, the total path length (computed as the sum of Euclidean edge lengths along the returned route), and the runtime until termination or success. From the repeated runs we report the success rate, and summary statistics (minimum, mean, and standard deviation) for path length and runtime.
+  \item \textbf{Success criteria:} A run is considered successful if the algorithm returns a collision-free path connecting \texttt{S} and \texttt{F} within the allowed time or iteration budget used in the experiments. Beyond feasibility, we evaluate solution quality using a composite objective that balances three factors: (i) path optimality (shorter total path length), (ii) result stability (low variability across repeated runs, measured by the standard deviation of path length), and (iii) convergence speed (lower average runtime or fewer iterations to convergence). For algorithm comparisons we normalize each metric and report a weighted composite score (default weights used in the experiments: length = 0.5, stability = 0.3, speed = 0.2); alternative weightings are examined in ablation studies to illustrate trade-offs between shortest-path performance, repeatability, and speed.
+  \item \textbf{Reproducibility:} All experiments are executed with explicit random seeds when possible; the map files and the code used to parse them are included in the repository so results can be reproduced exactly.
+\end{itemize}
+
+\subsection*{Experiment configuration used in benchmarking}
+\begin{itemize}
+    \item \textbf{Benchmark script:} Parameters used by \texttt{aco\_enhancement/benchmark\_aco.py} are representative of the paper experiments.
+    \item \textbf{Key parameters:} \texttt{RUNS=30}, \texttt{NO\_ANTS=50}, \texttt{EVAPORATION=0.15}, \texttt{ITERATIONS=100}, \texttt{INIT\_PHER=1e-4}. These values are set in the benchmarking script and may be adjusted for ablation studies.
+    \item \textbf{Indexing / plotting note:} The map and path coordinates in the code use \texttt{(row, column)} indexing. When plotting or converting to continuous coordinates the code maps \texttt{row} to the $y$ axis and \texttt{column} to the $x$ axis (see smoothing/plotting in the benchmarking script).
+  \end{itemize}
+
+Notes and usage:
+\begin{itemize}
+  \item The provided maps serve as compact benchmarks for algorithm comparison rather than large-scale real-world environments. If additional quantitative map statistics are required (map dimensions, obstacle density, shortest-manual-path baseline), we can compute and include those in the report and/or a supplementary table.
+  \item Figures of each ASCII map (visualized occupancy grids with start/goal markers) can be generated from the parsing script and embedded in the paper to aid reproducibility and clarity.
+\end{itemize}
+
+This section documents the input maps and the evaluation protocol used to benchmark the ant-colony algorithms presented in this work.

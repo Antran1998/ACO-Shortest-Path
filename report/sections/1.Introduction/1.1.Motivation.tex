@@ -1,14 +1,10 @@
 \section{Motivation}
+This work investigates the shortest-path planning problem on occupancy-grid maps through the lens of Ant Colony Optimization (ACO). Concretely, given a static, fully-known grid with occupied and free cells, the task is to find a collision-free route from start to goal that minimizes Euclidean path length and yields trajectories that are smooth enough for a motion controller to follow.
 
-This work addresses the path planning problem on grid maps using Ant Colony Optimization (ACO). Classical ACO implementations for grid-based navigation can suffer from slow convergence, path jaggedness (unsuitable for continuous motion), and suboptimal exploitation/exploration balance. These limitations affect real-world use-cases such as mobile robot navigation, autonomous ground vehicles in structured environments, and automated guided vehicles (AGVs) in warehouses.
+The motivation for improving ACO on grid maps comes from practical applications such as mobile robot navigation, autonomous ground vehicles in structured environments, and automated guided vehicles in warehouses. In these settings planners are commonly evaluated offline on benchmark maps, so robustness, repeatability and geometric path quality are all important.
 
-Prior approaches include standard ACO variants, heuristic-only planners (A*, Dijkstra), and sampling-based planners (RRT, PRM). Strengths and weaknesses:
-- A* / Dijkstra: exact on discrete grids but can produce unnatural paths and do not generalize well when using learned heuristics.
-- Sampling planners: good for continuous spaces but may be inefficient in dense discrete grids.
-- Baseline ACO: good at exploring multiple candidate paths but sensitive to parameter choices and produces discrete, jagged routes.
+Classical planners address the same problem in different ways. Graph search methods such as A* or Dijkstra guarantee optimality on discrete grids and are easy to implement, but their solutions tend to follow grid edges and produce jagged paths whose discrete cost does not directly reflect Euclidean length. Sampling-based planners (RRT, PRM) operate naturally in continuous spaces and can generate smooth paths after post-processing, yet they can be inefficient on dense grid benchmarks and produce results that are harder to compare deterministically across repeated trials. Standard ACO brings a different trade-off: it explores multiple candidate solutions in parallel and blends heuristic and pheromone guidance, but it is sensitive to parameter choices, can prematurely converge or stagnate, and typically yields discrete, noisy routes that require smoothing.
 
-The team selected a set of complementary improvements (cone-shaped pheromone initialization, adaptive pheromone/heuristic factors, division of labor among ants, backtracking heuristics, B-spline smoothing, and coordinated parameter fine-tuning) because together they:
-1. Introduce gentle directional guidance without overconstraining exploration.
-2. Adapt search behavior during optimization to avoid premature convergence.
-3. Allow role specialization to improve search efficiency.
-4. Produce geometrically shorter, smooth, and executable trajectories suitable for real robotic platforms.
+The improvements studied in this project—cone-shaped pheromone initialization, adaptive pheromone and heuristic scaling, division of labor among ants, targeted backtracking, and B-spline smoothing—are chosen because they address these specific weaknesses. Directional pheromone priors bias search toward promising corridors without overconstraining it; adaptive update rules shift the exploration–exploitation balance during a run to avoid stagnation; role specialization concentrates effort where it is most productive; backtracking reduces wasted time in dead-ends; and B-spline post-processing converts discrete paths into continuous, controller-friendly trajectories.
+
+Together, these elements aim to accelerate convergence, improve geometric path quality, and produce executable trajectories—making the paper's method a natural fit for the project's benchmarking and experimental goals.
