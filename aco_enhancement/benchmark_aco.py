@@ -41,11 +41,11 @@ def get_ant_colony_instance(name, map_obj, O1, O2, O3, O4, O5, O6):
                              use_backtracking=O4)
 
 MAP_FILE = 'map1.txt'
-RUNS = 30  # paper
-NO_ANTS = 50       # Paper Table 1: Colony size = 50
-EVAPORATION = 0.15 # Paper Table 1: Evaporation rate = 0.15
-ITERATIONS = 100   # Paper: Convergence around 23-81 iterations
-INIT_PHER = 0.0001 # Paper text: Initial concentration 1e-4
+RUNS = 100  # paper
+NO_ANTS = 30       # Paper Table 1: Colony size = 50
+EVAPORATION = 0.15 
+ITERATIONS = 50   
+INIT_PHER = 0.0001 
 
 METHODS = [
     # (method_id, method_name, (O1, O2, O3, O4, O5, O6), description)
@@ -101,18 +101,20 @@ def load_map(map_file):
     return map_obj
 
 def prompt_method_selection(methods):
-    print("\nSelect method to benchmark:")
+    print("\nSelect method(s) to benchmark:")
     for m in methods:
         print(f"  {m[0]}: {m[1]} - {m[3]}")
     while True:
         try:
-            mode = int(input(f"Enter the number corresponding to the method you want to run (1-{len(methods)}): "))
-            if mode in range(1, len(methods)+1):
-                return mode
+            modes = input(f"Enter the numbers corresponding to the methods you want to run, separated by spaces (e.g., 1 3 5): ")
+            mode_list = [int(x) for x in modes.strip().split() if x.isdigit()]
+            valid_modes = [m for m in mode_list if m in range(1, len(methods)+1)]
+            if valid_modes:
+                return valid_modes
             else:
-                print(f"Invalid input. Please enter a number from 1 to {len(methods)}.")
+                print(f"Invalid input. Please enter numbers from 1 to {len(methods)}, separated by spaces.")
         except ValueError:
-            print(f"Invalid input. Please enter a number from 1 to {len(methods)}.")
+            print(f"Invalid input. Please enter numbers from 1 to {len(methods)}, separated by spaces.")
 
 def print_results_table(results):
     print("\n" + "-"*70)
@@ -123,16 +125,17 @@ def print_results_table(results):
     print("-"*70)
 
 def save_stats_table(result_dir, map_base, method_file, tag, method_id, method_name, method_desc, results):
-    stat_filename = f"stat-{map_base}-{tag}{method_file}.txt"
+    stat_filename = f"stat-{map_base}.txt"
     stat_path = os.path.join(result_dir, stat_filename)
-    with open(stat_path, 'w', encoding='utf-8') as f:
-        f.write(f"Method {method_id}: {method_name}\n{method_desc}\n\n")
-        f.write("-"*70 + "\n")
-        f.write(f"{'Algorithm':<20} | {'Mean Len':<15} | {'Time (s)':<10}\n")
-        f.write("-" * 70 + "\n")
+    write_header = not os.path.exists(stat_path) or os.path.getsize(stat_path) == 0
+    with open(stat_path, 'a', encoding='utf-8') as f:
+        if write_header:
+            f.write("-"*70 + "\n")
+            f.write(f"{'Algorithm':<20} | {'Mean Len':<15} | {'Time (s)':<10}\n")
+            f.write("-" * 70 + "\n")
         for res in results:
             f.write(f"{res['name']:<20} | {res['mean_len']:<7.2f} ± {res['std_len']:<5.2f} | {res['mean_time']:<10.3f}\n")
-        f.write("-"*70 + "\n")
+            f.write("-"*70 + "\n")
 
 def recalc_stats_with_smoothing(results):
     """
@@ -221,9 +224,12 @@ def get_start_and_goal_nodes(map_obj):
     return map_obj.initial_node, map_obj.final_node
 
 def select_method(methods):
-    mode = prompt_method_selection(methods)
-    method_id, method_name, flags, method_desc = methods[mode-1]
-    return method_id, method_name, flags, method_desc
+    mode_list = prompt_method_selection(methods)
+    selected_methods = []
+    for mode in mode_list:
+        method_id, method_name, flags, method_desc = methods[mode-1]
+        selected_methods.append((method_id, method_name, flags, method_desc))
+    return selected_methods
 
 def execute_selected_method(method_name, map_obj, flags):
     O1, O2, O3, O4, O5, O6 = flags
@@ -234,16 +240,18 @@ def output_results(map_file, method_id, method_name, method_desc, results, map_o
     result_dir = os.path.join(os.path.dirname(__file__), '..', 'result')
     os.makedirs(result_dir, exist_ok=True)
     map_base = os.path.splitext(os.path.basename(map_file))[0]
-    method_file = method_name.replace(' ', '_').replace('(', '').replace(')', '').replace('-', '').lower()
-    tag = gen_tag(method_id)
-    save_stats_table(result_dir, map_base, method_file, tag, method_id, method_name, method_desc, results)
+    save_stats_table(result_dir, map_base, '', '', method_id, method_name, method_desc, results)
     best_path = results[-1]["best_path"]
     O5 = flags[4]
     if best_path and not O5:
+        method_file = method_name.replace(' ', '_').replace('(', '').replace(')', '').replace('-', '').lower()
+        tag = gen_tag(method_id)
         save_discrete_path_plot(result_dir, map_base, method_file, tag, method_name, results[-1]['min_len'], best_path, map_obj, start_node, goal_node)
     elif not best_path:
         print("[WARN] No best path found to visualize for this method.")
     if O5:
+        method_file = method_name.replace(' ', '_').replace('(', '').replace(')', '').replace('-', '').lower()
+        tag = gen_tag(method_id)
         save_smoothed_path_plot(result_dir, map_base, method_file, tag, method_name, results[-1]['min_len'], best_path, map_obj, start_node, goal_node)
 
 def main():
@@ -251,9 +259,17 @@ def main():
     if map_obj is None:
         return
     start_node, goal_node = get_start_and_goal_nodes(map_obj)
-    method_id, method_name, flags, method_desc = select_method(METHODS)
-    results = execute_selected_method(method_name, map_obj, flags)
-    output_results(MAP_FILE, method_id, method_name, method_desc, results, map_obj, start_node, goal_node, flags)
+    selected_methods = select_method(METHODS)
+    result_dir = os.path.join(os.path.dirname(__file__), '..', 'result')
+    os.makedirs(result_dir, exist_ok=True)
+    map_base = os.path.splitext(os.path.basename(MAP_FILE))[0]
+    stat_filename = f"stat-{map_base}.txt"
+    stat_path = os.path.join(result_dir, stat_filename)
+    if os.path.exists(stat_path):
+        os.remove(stat_path)
+    for method_id, method_name, flags, method_desc in selected_methods:
+        results = execute_selected_method(method_name, map_obj, flags)
+        output_results(MAP_FILE, method_id, method_name, method_desc, results, map_obj, start_node, goal_node, flags)
 
 if __name__ == '__main__':
     main()
