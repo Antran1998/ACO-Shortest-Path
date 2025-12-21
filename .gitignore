@@ -423,3 +423,6 @@ venv/
 **/main.*
 !main.tex
 !main.pdf
+
+result/
+/report/main.pdf

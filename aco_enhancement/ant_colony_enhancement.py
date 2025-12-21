@@ -267,7 +267,7 @@ class AntColony:
             if edge['FinalNode'] not in ant.visited_set:
                 candidates.append(edge)
 
-        # IMPROVEMENT 4: Multi-step intelligent backtracking when stuck
+        # Deadlock handling: O4 (backtracking) or O6 (fail-fast abandon)
         if not candidates:
             if self.use_backtracking and ant.backtrack_count < ant.max_backtracks:
                 backtrack_node = ant.backtrack_to_decision_point()
@@ -280,15 +280,10 @@ class AntColony:
                     self.backtrack_stats['failed_backtracks'] += 1
                     self.tabu_list.add(ant.actual_node)  # Mark as problematic
                     return None
-            elif not self.use_backtracking:
-                # Fallback: allow revisiting neighbors (old behavior)
-                candidates = actual_node.edges
             else:
-                # Exceeded backtrack limit or true deadlock
+                # O6: fail-fast abandon (no fallback to revisiting neighbors)
+                self.tabu_list.add(ant.actual_node)
                 return None
-
-        if not candidates:
-            return None  # Complete deadlock
 
         # soldier logic: epsilon-greedy exploration
         # use getattr to avoid attribute error
@@ -516,13 +511,13 @@ class AntColony:
             self.empty_paths()
 
         # IMPROVEMENT 4: Print backtracking statistics
-        if self.use_backtracking:
-            total = self.backtrack_stats['total_backtracks']
-            successful = self.backtrack_stats['successful_backtracks']
-            failed = self.backtrack_stats['failed_backtracks']
-            success_rate = (successful / total * 100) if total > 0 else 0
-            print(f"[Backtracking Stats] Total: {total}, Successful: {successful}, "
-                  f"Failed: {failed}, Success Rate: {success_rate:.1f}%")
+        # if self.use_backtracking:
+        #     total = self.backtrack_stats['total_backtracks']
+        #     successful = self.backtrack_stats['successful_backtracks']
+        #     failed = self.backtrack_stats['failed_backtracks']
+        #     success_rate = (successful / total * 100) if total > 0 else 0
+        #     print(f"[Backtracking Stats] Total: {total}, Successful: {successful}, "
+        #           f"Failed: {failed}, Success Rate: {success_rate:.1f}%")
             
         # return the best path found across all iterations
         if self.global_best_path:

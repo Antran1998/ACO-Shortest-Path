@@ -56,8 +56,7 @@ class AntColony:
 
     def __init__(self, in_map, no_ants, iterations, evaporation_factor,
                  pheromone_adding_constant, alpha, beta, xi,
-                 use_division_of_labor=False,
-                 use_deadlock_recovery=False): # add new flag for improve 4
+                 initial_pheromone): # add new flag for improve 4
         '''Initialise colony'''
         self.map = in_map
         self.no_ants = no_ants
@@ -70,12 +69,14 @@ class AntColony:
         self.paths = []
         self.ants = self.create_ants()
         self.best_result = []
+        self.initial_pheromone = initial_pheromone
 
-        self.use_division_of_labor = use_division_of_labor
-        self.use_deadlock_recovery = use_deadlock_recovery # save the flag
-        
-        # improve 4: initialize global tabu table for deadlocks
-        self.tabu_list = set()
+        # Initialize pheromone for all edges
+        for row in self.map.nodes_array:
+            for node in row:
+                for edge in node.edges:
+                    edge['Pheromone'] = self.initial_pheromone
+
 
     def create_ants(self):
         ''' Creates a list containin the
@@ -233,5 +234,4 @@ class AntColony:
             self.best_result = self.paths[0]
             # Empty the list of paths
             self.empty_paths()
-            print('Iteration:', i, 'length of the path:', len(self.best_result))
         return self.best_result
