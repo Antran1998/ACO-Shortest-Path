@@ -1,9 +1,86 @@
-\section{Dataset / Benchmark maps (Ân)}
+\section{Dataset / Benchmark maps}
 
-Describe the benchmark maps used for evaluation:
+We evaluate on a set of benchmark maps provided in the project repository (see the \texttt{maps/} folder). The benchmark collection contains four ASCII grid maps (\texttt{map1.txt}, \texttt{map3.txt}, \texttt{map7.txt}, and \texttt{map8.txt}) of varying complexity levels, used throughout the experiments in this work. Each map encodes free space, obstacles, and the task endpoints in a compact, human-readable format.
+
+\subsection*{Map Specifications}
+
+The benchmark suite includes maps with the following characteristics:
+
 \begin{itemize}
-  \item Source: project maps in the repository (e.g. \texttt{maps/map1.txt}, \texttt{maps/map2.txt}, \texttt{maps/map3.txt}).
-  \item Map format: ASCII grid with markers: \texttt{S} (start), \texttt{F} (goal), \texttt{E} (empty/free), \texttt{O} (obstacle).
-  \item Evaluation protocol: run each configuration multiple times (e.g. 20 runs), record min/mean/std of path length (Euclidean), runtime, and success rate.
-  \item Preprocessing: conversion to occupancy map and node graph (diagonal connectivity allowed when free).
+  \item \textbf{Map 1 (Simple):} $5 \times 5$ grid with basic obstacle configuration, suitable for validating algorithmic correctness and baseline performance.
+  \item \textbf{Map 3 (Complex):} $31 \times 31$ grid with intricate obstacle patterns, narrow corridors, and multiple potential path candidates. This map is designed to test exploration-exploitation balance and robustness to local optima.
+  \item \textbf{Map 7 (Medium):} $25 \times 20$ grid with moderate obstacle density and mixed open/constrained regions, representing intermediate difficulty.
+  \item \textbf{Map 8 (Medium):} $16 \times 16$ grid with clustered obstacles and multiple viable routes, testing the algorithm's ability to discover diverse solution paths.
 \end{itemize}
+
+\subsection*{Map Format and Parsing}
+
+\begin{itemize}
+  \item \textbf{Representation:} Each map is an ASCII grid where each cell contains one of the following markers: \texttt{S} (start), \texttt{F} (goal/finish), \texttt{E} (empty / free cell), and \texttt{O} (obstacle).
+  \item \textbf{Grid interpretation:} The grid rows correspond to the map's $y$ axis and columns to the $x$ axis; cells are square and implicitly unit-spaced. Coordinates are taken at cell centers when converting to continuous space for distance calculations.
+  \item \textbf{Preprocessing:} For each map we construct an occupancy grid and then build a node graph for planning. Nodes correspond to free cells; connectivity follows an 8-neighbour scheme (i.e., diagonal moves are allowed) but edges that would cross obstacle cells are omitted to preserve obstacle integrity. Edge costs are set to the Euclidean distance between node centers, which naturally accounts for diagonal movement ($\sqrt{2}$ units) versus straight movement (1 unit).
+\end{itemize}
+
+\subsection*{Evaluation Protocol and Metrics}
+
+\begin{itemize}
+  \item \textbf{Repetitions:} Each algorithm configuration is executed \texttt{RUNS=30} times per map to capture stochastic variability and ensure statistically meaningful results (see the benchmarking script \texttt{benchmark\_aco.py}).
+  
+  \item \textbf{Recorded metrics:} For each run we record:
+  \begin{itemize}
+    \item Success/failure status (whether a feasible collision-free path from \texttt{S} to \texttt{F} was found)
+    \item Total path length computed as the sum of Euclidean edge lengths:
+    \[
+    L = \sum_{i=1}^{n-1} \sqrt{(x_{i+1}-x_i)^2 + (y_{i+1}-y_i)^2}
+    \]
+    \item Runtime until termination or success
+  \end{itemize}
+  From the repeated runs we report summary statistics: minimum, mean, and standard deviation for path length and runtime.
+  
+  \item \textbf{Success criteria:} A run is considered successful if the algorithm returns a collision-free path connecting \texttt{S} and \texttt{F} within the allowed iteration budget (\texttt{ITERATIONS=100}). Beyond feasibility, we evaluate solution quality using three complementary metrics:
+  \begin{enumerate}
+    \item \textit{Path optimality:} Shorter total Euclidean path length
+    \item \textit{Result stability:} Low variability across repeated runs, measured by the standard deviation of path length
+    \item \textit{Convergence speed:} Lower average runtime to reach the best solution
+  \end{enumerate}
+  
+  \item \textbf{Reproducibility:} All experiments use consistent random initialization where possible. The map files and complete source code (including parsing, ACO implementation, and benchmarking scripts) are included in the repository to enable exact reproduction of results.
+\end{itemize}
+
+\subsection*{Experiment Configuration}
+
+The following parameters are used consistently across all benchmark experiments (defined in \texttt{benchmark\_aco.py}):
+
+\begin{itemize}
+    \item \texttt{RUNS = 30} --- Number of independent trials per configuration
+    \item \texttt{NO\_ANTS = 50} --- Colony size (number of ants per iteration)
+    \item \texttt{EVAPORATION = 0.15} --- Pheromone evaporation rate
+    \item \texttt{ITERATIONS = 100} --- Maximum number of iterations per run
+    \item \texttt{INIT\_PHER = 1e-4} --- Initial pheromone concentration
+    \item \texttt{alpha = 1.0} --- Base pheromone influence factor
+    \item \texttt{beta = 4.0} --- Base heuristic influence factor (adjusted for Euclidean distance metric)
+    \item \texttt{xi = 0.5} --- Adaptive scheduling strength (for Improvement 2)
+\end{itemize}
+
+These values are held constant for fair comparison across different algorithm configurations. Feature-specific parameters (cone coefficient, role transition probability, backtracking limits) are documented in the respective improvement sections.
+
+\subsection*{Implementation Notes}
+
+\begin{itemize}
+  \item \textbf{Coordinate system:} The code uses \texttt{(row, column)} indexing internally. When plotting or converting to continuous coordinates, \texttt{row} maps to the $y$ axis and \texttt{column} maps to the $x$ axis (see visualization code in the benchmarking script).
+  
+  \item \textbf{Distance calculation:} All path length measurements use true Euclidean distance rather than node count, ensuring that diagonal moves are accurately reflected in the quality metric. This is critical for fair comparison with geometric planners and real-world path execution.
+  
+  \item \textbf{Map parsing:} The \texttt{Map} class in \texttt{aco/map\_class.py} handles ASCII map parsing, occupancy grid construction, and node graph generation with 8-connectivity.
+\end{itemize}
+
+\subsection*{Benchmark Rationale}
+
+The selected maps provide a graduated test suite:
+\begin{itemize}
+  \item \textbf{Map 1} validates basic functionality and provides a sanity check (optimal path should be consistently found).
+  \item \textbf{Maps 7 and 8} test performance on intermediate-scale problems with realistic obstacle patterns.
+  \item \textbf{Map 3} serves as the primary challenge benchmark, with sufficient complexity to distinguish between algorithm variants while remaining computationally tractable for 30-run statistical analysis.
+\end{itemize}
+
+This graduated complexity allows us to assess both algorithmic correctness (simple maps) and practical performance under realistic constraints (complex maps), while the 30-run protocol provides robust statistical evidence for performance comparisons.

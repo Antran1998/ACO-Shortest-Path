@@ -4,12 +4,13 @@
 \usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=2cm]{geometry}
 % \usepackage{svg}
 \usepackage{tgtermes}
-\usepackage{fontspec}
+%\usepackage{fontspec}
 \usepackage{biblatex}
 \addbibresource{sections/ref.bib}
 % \usepackage{pgfsys}
 % \usepackage{transparent}
-\setmainfont{Times New Roman}
+%\setmainfont{Times New Roman}
+\usepackage{times}
 \usepackage{eso-pic}
 \usepackage{tikz}
 \usepackage{fancyhdr}
@@ -25,6 +26,15 @@
 \linespread{1.5}
 \usepackage{hyperref}
 \usepackage{longtable}
+\usepackage{booktabs}
+\usepackage[utf8]{vietnam}
+
+\usepackage{graphicx}    % resizebox
+\usepackage{amssymb}     % checkmark, times
+\usepackage{float}       % [H]
+\usepackage[table]{xcolor} % rowcolor
+\usepackage{multirow}
+
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -51,21 +61,21 @@
 \begin{document}
 
 \input{sections/cover-page}
-\setmainfont{Times New Roman}
+%\setmainfont{Times New Roman}
 
 \clearpage
 \pagenumbering{roman} 
 
 \pagenumbering{arabic}
 
-\chapter{Introduction (Ân)}
+\chapter{Introduction}
 \textit{Overview, objectives and structure of the report.}
 \input{sections/1.Introduction/1.1.Motivation}
 \input{sections/1.Introduction/1.2.Goals}
 \input{sections/1.Introduction/1.3.Scope}
 \input{sections/1.Introduction/1.4.Thesis-structure}
 
-\chapter{Overview and Approach (Phước)}
+\chapter{Overview and Approach}
 \input{sections/2.Overview/2.1.ACO-overview}
 \input{sections/2.Overview/2.2.Approach}
 
@@ -79,10 +89,10 @@
 \input{sections/3.Improvements/3.5.Smooth-Line}
 \input{sections/3.Improvements/3.6.Finetune-Params}
 
-\chapter{Additional Team Improvements (Optional) (Như - dự bị)}
+\chapter{Additional Team Improvements (Optional)}
 \input{sections/4.Suggest improvement (Optional)/4.0.Optional-Improvements}
 
-\chapter{Conclusion (Ân)}
+\chapter{Conclusion}
 \input{sections/5.Conclusion/summary}
 
 \input{sections/references}
