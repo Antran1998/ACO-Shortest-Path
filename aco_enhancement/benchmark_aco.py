@@ -40,7 +40,7 @@ def get_ant_colony_instance(name, map_obj, O1, O2, O3, O4, O5, O6):
                              use_division_of_labor=O3,
                              use_backtracking=O4)
 
-MAP_FILE = 'map1.txt'
+MAP_FILE = 'map3.txt'
 RUNS = 100  # paper
 NO_ANTS = 30       # Paper Table 1: Colony size = 50
 EVAPORATION = 0.15 
@@ -55,7 +55,7 @@ METHODS = [
     (4, "Division of Labor (O3)",   (False, False, True,  False, False, False), "Division of labor (O3) only."),
     (5, "Backtracking (O4)",        (False, False, False, True,  False, False), "Deadlock/backtracking (O4) only."),
     (6, "Path Smoothing (O5)",      (False, False, False, False, True,  False), "Path smoothing (O5) only. Smoothing applied after basic ACO."),
-    (7, "New Algorithm Flow (O6)",  (False, False, False, False, False, True),  "Algorithm step optimization (O6) only."),
+    (7, "New Algorithm Flow (O6)",  (False, False, False, False, True, True),  "Algorithm step optimization (O6) only."),
     (8, "Proposed Method (Full)",   (True,  True,  True,  True,  True,  True),  "All improvements enabled (O1-O6)."),
 ]
 
