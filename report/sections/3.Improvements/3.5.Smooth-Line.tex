@@ -24,10 +24,10 @@ The smoothing algorithm was applied to the discrete paths generated in four diff
 		\toprule
 		\textbf{Environment} & \textbf{Discrete (m)} & \textbf{Smoothed (m)} & \textbf{Reduction (m)} & \textbf{Improv. (\%)} \\
 		\midrule
-		Map 1 (Simple) & 5.24 & 5.22 & 0.02 & 0.38\% \\
-		Map 3 (Complex) & 50.94 & 49.29 & 1.65 & 3.24\% \\
-		Map 7 (Medium) & 49.14 & 48.36 & 0.78 & 1.59\% \\
-		Map 8 (Medium) & 22.97 & 22.03 & 0.94 & 4.09\% \\
+		Map a (Simple) & 5.24 & 5.22 & 0.02 & 0.38\% \\
+		Map b (Complex) & 50.94 & 49.29 & 1.65 & 3.24\% \\
+		Map c (Medium) & 22.97 & 22.03 & 0.94 & 4.09\% \\
+		Map d (Medium) & 49.14 & 48.36 & 0.78 & 1.59\% \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -37,25 +37,25 @@ Visually, Fig.~\ref{fig:smoothing_maps} illustrates the smoothing effect, where 
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{images/visu-map3-m6-path_smoothing_o5-map3.png}
-		\caption{Map 3}
+		\includegraphics[width=\textwidth]{images/visu-map1-m6-path_smoothing_o5-map1.png}
+		\caption{Map a}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{images/visu-map7-m6-path_smoothing_o5-map7.png}
-		\caption{Map 7}
+		\includegraphics[width=\textwidth]{images/visu-map3-m6-path_smoothing_o5-map3.png}
+		\caption{Map b}
 	\end{subfigure}
 	
 	\vspace{0.5cm}
 	
 	\begin{subfigure}[b]{0.48\textwidth}
 		\includegraphics[width=\textwidth]{images/visu-map8-m6-path_smoothing_o5.png}
-		\caption{Map 8}
+		\caption{Map c}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{images/visu-map1-m6-path_smoothing_o5-map1.png}
-		\caption{Map 1}
+		\includegraphics[width=\textwidth]{images/visu-map7-m6-path_smoothing_o5-map7.png}
+		\caption{Map d}
 	\end{subfigure}
 	\caption{Comparison of discrete ACO paths (red) and smoothed B-Spline paths (green) in different environments.}
 	\label{fig:smoothing_maps}
