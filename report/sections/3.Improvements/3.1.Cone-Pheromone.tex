@@ -4,14 +4,32 @@
 Initialize pheromone distribution with a cone-shaped bias pointed toward the goal. This provides gentle directional guidance without forcing a fixed path.
 
 \subsection{Implementation}
-Compute initial pheromone for each node/edge using a combination of a normalized cone term and an inverse-distance term:
-\[
-\tau_0 = \tau_{\text{base}} + c \cdot \frac{|x-y|}{L} + \frac{1}{d}
-\]
-where $c$ is a small coefficient, $L$ is map scale and $d$ is Euclidean distance to goal.
+Compute initial pheromone for each node/edge using a combination of a normalized cone term and an inverse-distance term. In the implementation (see \texttt{aco\_enhancement/ant\_colony\_enhancement.py}) the initialization is:
+\begin{equation*}
+	au_0 = \tau_{\mathrm{base}} + c\cdot\frac{|x-y|}{L} + \frac{1}{d+\epsilon}
+\end{equation*}
+where:
+\begin{itemize}
+	\item \texttt{tau\_base} is the configured \texttt{initial\_pheromone} (base pheromone level),
+	\item \texttt{c} is the cone coefficient (implemented with a default value \texttt{c=0.09}),
+	\item \texttt{|x-y|} is the coordinate difference used as a simple directional cue (the code uses the absolute difference between the node's column and row indices),
+	\item \texttt{L} is the map scale (the code uses the map dimension \texttt{map\_len = in\_map.shape[0]}),
+	\item \texttt{d} is the Euclidean distance from the edge's target node to the goal, and
+	\item \texttt{epsilon} is a small constant to avoid division by zero (\texttt{EPSILON = 1e-6} in the code).
+\end{itemize}
+
+Concretely, the code computes the cone term as \texttt{(0.09 * coordinate\_diff) / map\_len} and the inverse-distance term as \texttt{1.0 / (d + EPSILON)}. The resulting value is added to \texttt{initial\_pheromone} and written to the edge as \texttt{edge['Pheromone']}; edge probabilities are initialized to \texttt{0.0}.
 
 \subsection{Benefits}
 Faster convergence, lower variance across runs, maintains exploration while guiding ants toward promising regions.
 
 \subsection{Experimental results}
-Insert per-map quantitative results here: min/mean/std path length and runtime compared to baseline.
+Insert per-map quantitative results here: min/mean/std path length and runtime compared to baseline. When reporting results, include ablations that:
+\begin{itemize}
+	\item compare \texttt{use\_cone\_pheromone=True/False},
+	\item sweep the cone coefficient (e.g. $c \in \{0.01,0.05,0.09,0.2\}$) to show its effect on bias vs. exploration,
+	\item report min/mean/std path length, success rate, and runtime, and
+	\item visualize the initial pheromone field (heatmap) overlaid with example paths to illustrate how the cone bias shapes early exploration.
+\end{itemize}
+
+The implementation notes above and the suggested ablations will help quantify trade-offs between faster convergence and the risk of over-biasing the search towards suboptimal corridors.

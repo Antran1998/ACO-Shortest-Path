@@ -1,13 +1,63 @@
-\section{Smooth Line (B-spline) (Thương)}
+\section{Smooth line (B-spline) - Thương}
 
-\subsection{Idea}
-Post-process discrete grid paths using cubic B-spline interpolation to create continuous, smooth trajectories suitable for controllers.
+\subsection{Idea}  
+Traditional grid-based ACO generates paths characterized by sharp 45 or 90-degree turns, which are kinematically inefficient for mobile robots. To resolve this, a post-processing smoothing technique using Cubic B-Spline interpolation is introduced to create continuous trajectories. By transforming discrete waypoints into smooth curves, the method bridges the gap between grid planning and practical robot control, making the path superior for real-world execution.
 
-\subsection{Implementation}
-Convert grid waypoint sequence to control points, apply cubic B-spline with chosen smoothing factor and sample densely to form the final trajectory.
+\subsection{Implementation}  
+The smoothing process is implemented using the \texttt{scipy.interpolate} library, specifically the \texttt{splrep} and \texttt{splev} functions. Discrete path coordinates $P$ are parameterized based on cumulative Euclidean distance to account for non-uniform spacing and are upsampled to increase resolution. The path is defined by:
+\begin{equation}
+	P_{\text{smooth}}(t) = \sum_{i=0}^{n} C_i B_{i,3}(t)
+\end{equation}
+where $B_{i,3}(t)$ represents basis functions of degree 3. Specific smoothing factors are applied to round sharp corners while ensuring the trajectory remains collision-free.
 
-\subsection{Benefits}
-Removes sharp corners, yields C2-continuous curves, increases point density for motion planning.
+\subsection{Benefits}  
+B-Spline interpolation enhances path efficiency by allowing the robot to cut corners at obstacle edges, resulting in a physically shorter traversal distance. The removal of sharp turns ensures the trajectory is highly compatible with vehicle dynamics and practical navigation requirements.
 
-\subsection{Experimental results}
-Provide before/after figures and quantitative change in curvature/point density.
+\subsection{Experimental results}  
+The smoothing algorithm was applied to the discrete paths generated in four different map environments. As summarized in Table~\ref{tab:results_smoothing}, the post-processing step consistently reduced the path length while preserving collision-free trajectories. For example, in Map~3, the path length was reduced from 50.94~m to 49.29~m, demonstrating the effectiveness of the proposed smoothing method in complex environments.
+
+\begin{table}[H]
+	\centering
+	\caption{Impact of B-Spline smoothing on path length across different maps}
+	\label{tab:results_smoothing}
+	\begin{tabular}{l|c|c|c|c}
+		\toprule
+		\textbf{Environment} & \textbf{Discrete (m)} & \textbf{Smoothed (m)} & \textbf{Reduction (m)} & \textbf{Improv. (\%)} \\
+		\midrule
+		Map a (Simple) & 5.24 & 5.22 & 0.02 & 0.38\% \\
+		Map b (Complex) & 50.94 & 49.29 & 1.65 & 3.24\% \\
+		Map c (Medium) & 22.97 & 22.03 & 0.94 & 4.09\% \\
+		Map d (Medium) & 49.14 & 48.36 & 0.78 & 1.59\% \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Visually, Fig.~\ref{fig:smoothing_maps} illustrates the smoothing effect, where the red dashed lines represent the grid-constrained movement and the green solid lines depict the smoothed trajectories.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{images/visu-map1-m6-path_smoothing_o5-map1.png}
+		\caption{Map a}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{images/visu-map3-m6-path_smoothing_o5-map3.png}
+		\caption{Map b}
+	\end{subfigure}
+	
+	\vspace{0.5cm}
+	
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{images/visu-map8-m6-path_smoothing_o5.png}
+		\caption{Map c}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{images/visu-map7-m6-path_smoothing_o5-map7.png}
+		\caption{Map d}
+	\end{subfigure}
+	\caption{Comparison of discrete ACO paths (red) and smoothed B-Spline paths (green) in different environments.}
+	\label{fig:smoothing_maps}
+\end{figure}
+\newpage

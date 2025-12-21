@@ -1,10 +1,6 @@
 \section{Goals}
+This project has several interrelated goals that guide the design and evaluation of the proposed ACO improvements. At the algorithmic level we seek faster and more robust convergence on grid benchmarks, measured both by time-to-best-solution and by reduced variance across repeated runs. Equally important is improving geometric path quality: rather than minimizing node count we aim to reduce Euclidean length and to report both average and best-of-run lengths over multiple trials.
 
-The primary goals of this project are:
-\begin{enumerate}
-  \item Improve ACO convergence speed and robustness on grid benchmarks.
-  \item Reduce geometric path length (Euclidean) rather than node count.
-  \item Produce smooth, continuous paths suitable for motion controllers through post-processing.
-  \item Design complementary improvements that operate together without destructive interference.
-  \item Provide reproducible experiments and clear comparison to the baseline.
-\end{enumerate}
+From a practical perspective the work also targets trajectory smoothness and executability. Paths produced by the planner will be post-processed with B-spline smoothing so they are suitable for motion controllers, and we will quantify smoothness using curvature and continuity statistics. The algorithmic components themselves are designed to be complementary—pheromone initialization, adaptive update rules, role specialization and backtracking should work together rather than interfere.
+
+Finally, experiments are intended to be reproducible and informative. We compare against baseline ACO and classical planners using standard statistical measures (mean, standard deviation, and success rate) across benchmark maps, and we report convergence, path-quality, smoothness and robustness metrics for a complete picture of performance.
