@@ -34,6 +34,7 @@
 \usepackage{float}       % [H]
 \usepackage[table]{xcolor} % rowcolor
 \usepackage{multirow}
+\usepackage[english]{babel}
 
 \hypersetup{
     colorlinks,
@@ -53,8 +54,6 @@
 \usepackage{pgfplots} % Required for the TikZ figure
 \pgfplotsset{compat=1.17} % Ensure compatibility with the latest version of pgfplots
 
-\newcommand{\Khang}[1]{\textcolor{red!70!pink}{\textbf{\textit{#1}}}}
-
 % Define chapter font size to be 15pt
 \titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
 
@@ -64,6 +63,10 @@
 %\setmainfont{Times New Roman}
 
 \clearpage
+
+\tableofcontents
+\clearpage
+
 \pagenumbering{roman} 
 
 \pagenumbering{arabic}
@@ -79,7 +82,7 @@
 \input{sections/2.Overview/2.1.ACO-overview}
 \input{sections/2.Overview/2.2.Approach}
 
-\chapter{Detailed Improvements (Chung)}
+\chapter{Detailed Improvements}
 \textit{Dataset / benchmark description and detailed description for each improvement.}
 \input{sections/3.Improvements/3.0.Dataset}
 \input{sections/3.Improvements/3.1.Cone-Pheromone}
@@ -87,10 +90,8 @@
 \input{sections/3.Improvements/3.3.Division-of-Labor}
 \input{sections/3.Improvements/3.4.Backtracking}
 \input{sections/3.Improvements/3.5.Smooth-Line}
-\input{sections/3.Improvements/3.6.Finetune-Params}
-
-\chapter{Additional Team Improvements (Optional)}
-\input{sections/4.Suggest improvement (Optional)/4.0.Optional-Improvements}
+\input{sections/3.Improvements/3.6.ACO-restructure}
+\input{sections/3.Improvements/3.7.Combination}
 
 \chapter{Conclusion}
 \input{sections/5.Conclusion/summary}

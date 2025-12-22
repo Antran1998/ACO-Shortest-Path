@@ -1,4 +1,4 @@
-\section{Division of Labor (Thương)}
+\section{Division of Labor}
 
 \subsection{Idea}
 To overcome the limitations of standard Ant Colony Optimization (ACO) where all agents follow uniform transition rules, a dynamic division of labor strategy is implemented. By mimicking natural colonies, ants are categorized into two distinct roles: soldiers and kings. Soldier ants prioritize global exploration through an $\epsilon$-greedy strategy, selecting random valid neighbors with a probability of $\epsilon = 0.2$ to prevent premature convergence to suboptimal paths. Conversely, king ants focus on path consolidation by adhering strictly to high-quality pheromone trails.
