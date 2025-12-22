@@ -1,0 +1,95 @@
+\section{Combination of Improvements (Proposed Method)}
+\sloppy
+
+\subsection{Idea}
+Combine all proposed improvements (O1--O6) into a single pipeline to leverage complementary strengths: cone pheromone initialization, adaptive heuristic scheduling, division of labor, deadlock/backtracking, path smoothing, and the restructured control flow.
+
+\subsection{Implementation}
+All modules are enabled jointly in the enhanced ACO implementation. The decision policy uses cone-initialized pheromone and adaptive $(\alpha'(n), \beta'(n))$, ants are assigned roles (explorer/exploiter), deadlocks trigger backtracking and re-placement, and the algorithm follows the restructured loop with termination-time smoothing.
+
+\subsection{Benefits}
+The combined method aims to:
+\begin{itemize}
+    \item Improve path quality and reliability across varied environments.
+    \item Maintain competitive or reduced runtime via efficient control flow and recovery.
+    \item Reduce variance by coordinating exploration and exploitation throughout iterations.
+\end{itemize}
+
+\subsection{Experimental Results}
+The four test maps correspond to different environments:
+\begin{itemize}
+    \item \textbf{Map a}: Simple
+    \item \textbf{Map b}: Cluttered
+    \item \textbf{Map c}: Crowded
+    \item \textbf{Map d}: Maze-like
+\end{itemize}
+
+We compare Basic ACO, individual improvements (O1--O6), and the full combination (Proposed Method (Full)). Metrics are mean path length (with standard deviation) and computation time; best values per map are highlighted in bold. Results are summarized in Table~\ref{tab:combination-results}.
+
+\begin{table}[H]
+    \centering
+    \caption{Final comparison across all methods on four maps}
+    \label{tab:combination-results}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \hline
+        \multirow{8}{*}{map a (Simple)} 
+            & Basic ACO & 6.04 $\pm$ 0.64 & 0.209 \\
+            & Cone Pheromone (O1) & 5.24 $\pm$ 0.00 & 0.180 \\
+            & Adaptive Heuristic (O2) & \textbf{5.24 $\pm$ 0.00} & \textbf{0.170} \\
+            & Division of Labor (O3) & 5.24 $\pm$ 0.00 & 0.235 \\
+            & Backtracking (O4) & 5.24 $\pm$ 0.00 & 0.265 \\
+            & Path Smoothing (O5) & 5.24 $\pm$ 0.00 & 0.190 \\
+            & New Algorithm Flow (O6) & 5.24 $\pm$ 0.00 & 0.183 \\
+            & \textbf{Proposed Method (Full)} & \textbf{5.24 $\pm$ 0.00} & 0.198 \\
+        \hline
+        \multirow{8}{*}{map b (Cluttered)} 
+            & Basic ACO & 88.48 $\pm$ 6.95 & 3.056 \\
+            & Cone Pheromone (O1) & \textbf{49.21 $\pm$ 1.68} & \textbf{2.025} \\
+            & Adaptive Heuristic (O2) & 86.27 $\pm$ 23.06 & 3.263 \\
+            & Division of Labor (O3) & 59.30 $\pm$ 3.47 & 2.359 \\
+            & Backtracking (O4) & 55.29 $\pm$ 5.26 & 2.556 \\
+            & Path Smoothing (O5) & 82.45 $\pm$ 22.17 & 3.315 \\
+            & New Algorithm Flow (O6) & 89.73 $\pm$ 25.78 & 3.939 \\
+            & \textbf{Proposed Method (Full)} & 52.19 $\pm$ 2.15 & 2.629 \\
+        \hline
+        \multirow{8}{*}{map c (Crowded)} 
+            & Basic ACO & 37.11 $\pm$ 2.37 & 1.300 \\
+            & Cone Pheromone (O1) & \textbf{23.20 $\pm$ 0.32} & 0.764 \\
+            & Adaptive Heuristic (O2) & 23.72 $\pm$ 1.01 & 0.777 \\
+            & Division of Labor (O3) & 23.30 $\pm$ 0.36 & \textbf{0.758} \\
+            & Backtracking (O4) & 23.60 $\pm$ 0.76 & 0.848 \\
+            & Path Smoothing (O5) & 24.01 $\pm$ 1.22 & 0.812 \\
+            & New Algorithm Flow (O6) & 23.96 $\pm$ 1.48 & 0.802 \\
+            & \textbf{Proposed Method (Full)} & 23.95 $\pm$ 1.38 & 0.926 \\
+        \hline
+        \multirow{8}{*}{map d (Maze-like)} 
+            & Basic ACO & 85.08 $\pm$ 9.43 & 3.119 \\
+            & Cone Pheromone (O1) & 47.98 $\pm$ 2.31 & \textbf{1.442} \\
+            & Adaptive Heuristic (O2) & 61.19 $\pm$ 9.80 & 1.740 \\
+            & Division of Labor (O3) & 50.81 $\pm$ 2.40 & 1.462 \\
+            & Backtracking (O4) & \textbf{47.92 $\pm$ 3.52} & 1.583 \\
+            & Path Smoothing (O5) & 61.28 $\pm$ 8.91 & 1.674 \\
+            & New Algorithm Flow (O6) & 62.75 $\pm$ 11.02 & 1.740 \\
+            & \textbf{Proposed Method (Full)} & 48.06 $\pm$ 2.05 & 1.503 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The combined method delivers strong and stable performance overall, often near the best path quality while keeping runtime competitive.
+
+\subsubsection*{\textbullet\ Simple Environment (Map a)}
+All improvements reach the optimal path (5.24 $\pm$ 0.00). The full combination is close to the fastest variants (O2/O1), with negligible overhead.
+
+\subsubsection*{\textbullet\ Cluttered Environment (Map b)}
+Cone initialization (O1) attains the best mean length (49.21). The combined method remains near-optimal (52.19) and far better than Basic ACO, with moderate runtime.
+
+\subsubsection*{\textbullet\ Crowded Environment (Map c)}
+O1/O3 slightly edge the best mean lengths, while the combined method is close (23.95) with acceptable time. Gains over Basic ACO are substantial.
+
+\subsubsection*{\textbullet\ Maze-like Environment (Map d)}
+The combined method is effectively tied with the best single components (O1/O4) on mean length (48.06 vs.\ 47.92--47.98) and remains near the fastest runtime.
+
+\subsubsection*{Summary and Insights}
+Across all maps, the \emph{Proposed Method (Full)} consistently improves over Basic ACO and matches or approaches the best single-component results, with notably low variance in complex maps (e.g., Map b: $\pm$2.15 vs.\ $\pm$25.78 for O6). This indicates that coordinated integration of O1--O6 provides robust, high-quality paths with competitive efficiency.

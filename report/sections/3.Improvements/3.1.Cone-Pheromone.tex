@@ -1,4 +1,5 @@
 \section{Cone Pheromone (Ân)}
+\sloppy
 
 \subsection{Idea}
 Initialize pheromone distribution with a cone-shaped bias pointed toward the goal. This provides gentle directional guidance without forcing a fixed path.
@@ -24,12 +25,124 @@ Concretely, the code computes the cone term as \texttt{(0.09 * coordinate\_diff)
 Faster convergence, lower variance across runs, maintains exploration while guiding ants toward promising regions.
 
 \subsection{Experimental results}
-Insert per-map quantitative results here: min/mean/std path length and runtime compared to baseline. When reporting results, include ablations that:
+The four test maps used in the experiments correspond to different types of environments:
 \begin{itemize}
-	\item compare \texttt{use\_cone\_pheromone=True/False},
-	\item sweep the cone coefficient (e.g. $c \in \{0.01,0.05,0.09,0.2\}$) to show its effect on bias vs. exploration,
-	\item report min/mean/std path length, success rate, and runtime, and
-	\item visualize the initial pheromone field (heatmap) overlaid with example paths to illustrate how the cone bias shapes early exploration.
+    \item \textbf{Map a}: Simple environment
+    \item \textbf{Map b}: Cluttered environment
+    \item \textbf{Map c}: Crowded environment
+    \item \textbf{Map d}: Maze-like environment
 \end{itemize}
 
-The implementation notes above and the suggested ablations will help quantify trade-offs between faster convergence and the risk of over-biasing the search towards suboptimal corridors.
+We compare the standard ACO (Basic ACO) to the cone-biased initialization (Cone Pheromone (O1)) on four maps using average path length (Mean Len, with standard deviation) and computation time. The results are summarized in Table~\ref{tab:cone-results}.
+
+% Visualization for Map a
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map1-basic_aco.png}
+        \caption{Map a - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map1-m3-cone_pheromone_o1.png}
+        \caption{Map a - Cone Pheromone (O1)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map a.}
+    \label{fig:cone-path-visualization-map1}
+\end{figure}
+
+% Visualization for Map b
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map3-basic_aco.png}
+        \caption{Map b - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map3-m3-cone_pheromone_o1.png}
+        \caption{Map b - Cone Pheromone (O1)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map b.}
+    \label{fig:cone-path-visualization-map3}
+\end{figure}
+
+% Visualization for Map c
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map8-basic_aco.png}
+        \caption{Map c - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map8-m3-cone_pheromone_o1.png}
+        \caption{Map c - Cone Pheromone (O1)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map c.}
+    \label{fig:cone-path-visualization-map8}
+\end{figure}
+
+% Visualization for Map d
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map7-basic_aco.png}
+        \caption{Map d - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O1/visu-map7-m3-cone_pheromone_o1.png}
+        \caption{Map d - Cone Pheromone (O1)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map d.}
+    \label{fig:cone-path-visualization-map7}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of Basic ACO and Cone Pheromone (O1) on different maps}
+    \label{tab:cone-results}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+    	\textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \hline
+        \multirow{2}{*}{map a (Simple)} & Basic ACO & 6.04 $\pm$ 0.54 & 0.166 \\
+         & Cone Pheromone (O1) & 5.24 $\pm$ 0.00 & 0.213 \\
+        \hline
+        \multirow{2}{*}{map b (Cluttered)} & Basic ACO & 89.15 $\pm$ 7.56 & 5.766 \\
+         & Cone Pheromone (O1) & 49.58 $\pm$ 1.59 & 4.075 \\
+        \hline
+        \multirow{2}{*}{map c (Crowded)} & Basic ACO & 37.30 $\pm$ 2.06 & 2.158 \\
+         & Cone Pheromone (O1) & 23.26 $\pm$ 0.34 & 1.469 \\
+        \hline
+        \multirow{2}{*}{map d (Maze-like)} & Basic ACO & 85.11 $\pm$ 10.29 & 5.603 \\
+         & Cone Pheromone (O1) & 48.02 $\pm$ 2.17 & 2.645 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The experimental results indicate that the cone-initialized pheromone substantially improves solution quality and often reduces runtime, especially in cluttered, crowded, and maze-like environments.
+
+\subsubsection*{\textbullet\ Simple Environment (Map a)}
+Both methods reach the optimal corridor; O1 is consistently optimal (5.24 $\pm$ 0.00) versus Basic ACO (6.04 $\pm$ 0.54). Runtime is comparable (0.213 s vs. 0.166 s).
+
+\subsubsection*{\textbullet\ Cluttered Environment (Map b)}
+O1 finds much shorter paths (49.58 $\pm$ 1.59) than Basic ACO (89.15 $\pm$ 7.56) and is faster on average (4.075 s vs. 5.766 s), showing strong guidance without over-bias.
+
+\subsubsection*{\textbullet\ Crowded Environment (Map c)}
+O1 is markedly better (23.26 $\pm$ 0.34) than Basic ACO (37.30 $\pm$ 2.06) and also faster (1.469 s vs. 2.158 s), indicating faster convergence with lower variance.
+
+\subsubsection*{\textbullet\ Maze-like Environment (Map d)}
+O1 significantly outperforms the baseline (48.02 $\pm$ 2.17 vs. 85.11 $\pm$ 10.29) with lower time (2.645 s vs. 5.603 s), demonstrating robustness in complex layouts.
+
+\subsubsection*{Summary and Insights}
+The cone-shaped initialization improves both mean path length and stability across all maps, with notable gains in challenging environments. Guidance from the cone field accelerates early exploration toward promising regions while preserving diversity, leading to shorter paths and competitive or better runtimes.

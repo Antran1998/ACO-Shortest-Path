@@ -1,0 +1,171 @@
+\section{ACO Restructure}
+\sloppy
+
+\subsection{Idea}
+Coordinate parameter choices and control flow so multiple improvements (cone pheromone, adaptive heuristic scheduling, path smoothing) work together without interference. The restructure clarifies iteration boundaries, failure handling, and role assignment within ants to improve consistency and convergence.
+
+\subsection{Implementation}
+We adopt the control-flow shown in Figure~\ref{fig:aco-flow-new}, aligned with the baseline process in Figure~\ref{fig:aco-flow-basic}. Key stages:
+\begin{enumerate}
+  \item \textbf{Initialization}: Set global parameters (ant count, iterations $N$, evaporation $\rho$, pheromone constant $Q$). Initialize the tabu table and place ants.
+  \item \textbf{Variable division of labor}: Assign roles per ant (e.g., explorer vs. exploiter) to balance search diversity and convergence.
+  \item \textbf{Node selection}: Use current $\alpha'(n)$, $\beta'(n)$ from adaptive scheduling and cone-initialized pheromone to compute transition probabilities; select the next node.
+  \item \textbf{Deadlock handling}: Detect stuck states. If deadlocked, mark the grid and abandon the current search; re-place or re-route the ant to resume exploration.
+  \item \textbf{Iteration completion}: If any ant completes a valid path, apply pheromone renewal (global/local update with evaporation). Otherwise, continue selecting nodes.
+  \item \textbf{Loop control}: Increment iteration index. If iteration not complete, continue; if complete, proceed to renewal and loop checks.
+  \item \textbf{Termination}: Stop when the maximum number of iterations is reached. Apply \emph{path smoothing} (e.g., B-spline) to the best-found path.
+\end{enumerate}
+
+\paragraph{Parameter table and tuning strategy}
+\begin{itemize}
+  \item Ant count, max iterations $N$, evaporation factor $\rho$, pheromone constant $Q$.
+  \item Cone coefficient $c$ for initialization bias; adaptive schedule coefficient $\xi$ for $\alpha'(n)$, $\beta'(n)$.
+  \item Role scalings for explorer/exploiter probability weighting; smoothing factor for post-processing.
+\end{itemize}
+
+\subsection{Benefits}
+Improved combined performance (balanced quality, runtime, and consistency) by:
+\begin{itemize}
+  \item Structuring failure recovery (deadlocks, abandon and re-place) to reduce wasted iterations.
+  \item Integrating cone-initialization and adaptive scheduling at the decision step to guide exploration without over-bias.
+  \item Applying smoothing only at termination to preserve correctness while improving final path usability.
+\end{itemize}
+
+\subsection{Control-flow diagrams}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/O6/basic_flow.webp}
+    \caption{Baseline ACO process (reference).}
+    \label{fig:aco-flow-basic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/new_flow.png}
+    \caption{Restructured ACO process with role division, deadlock handling, adaptive scheduling, and path smoothing.}
+    \label{fig:aco-flow-new}
+\end{figure}
+
+\subsection{Experimental Results}
+The four test maps used in the experiments correspond to different types of environments:
+\begin{itemize}
+    \item \textbf{Map a}: Simple environment
+    \item \textbf{Map b}: Cluttered environment
+    \item \textbf{Map c}: Crowded environment
+    \item \textbf{Map d}: Maze-like environment
+\end{itemize}
+
+We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New Algorithm Flow (O6)) on four maps using average path length (Mean Len, with standard deviation) and computation time. The results are summarized in Table~\ref{tab:restructure-results}.
+
+% Visualization for Map a
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map1-basic_aco.png}
+        \caption{Map a - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map1-m7-new_algorithm_flow_o6.png}
+        \caption{Map a - New Algorithm Flow (O6)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map a.}
+    \label{fig:restructure-path-visualization-map1}
+\end{figure}
+
+% Visualization for Map b
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map3-basic_aco.png}
+        \caption{Map b - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map3-m7-new_algorithm_flow_o6.png}
+        \caption{Map b - New Algorithm Flow (O6)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map b.}
+    \label{fig:restructure-path-visualization-map3}
+\end{figure}
+
+% Visualization for Map c
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map8-basic_aco.png}
+        \caption{Map c - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map8-m7-new_algorithm_flow_o6.png}
+        \caption{Map c - New Algorithm Flow (O6)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map c.}
+    \label{fig:restructure-path-visualization-map8}
+\end{figure}
+
+% Visualization for Map d
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map7-basic_aco.png}
+        \caption{Map d - Basic ACO}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/O6/visu-map7-m7-new_algorithm_flow_o6.png}
+        \caption{Map d - New Algorithm Flow (O6)}
+    \end{subfigure}
+    \caption{Visualization of paths on Map d.}
+    \label{fig:restructure-path-visualization-map7}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of Basic ACO and New Algorithm Flow (O6) on different maps}
+    \label{tab:restructure-results}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \hline
+        \multirow{2}{*}{map a (Simple)} & Basic ACO & 6.12 $\pm$ 0.67 & 0.302 \\
+         & New Algorithm Flow (O6) & 5.24 $\pm$ 0.00 & 0.276 \\
+        \hline
+        \multirow{2}{*}{map b (Cluttered)} & Basic ACO & 88.52 $\pm$ 8.51 & 5.130 \\
+         & New Algorithm Flow (O6) & 82.83 $\pm$ 20.03 & 5.729 \\
+        \hline
+        \multirow{2}{*}{map c (Crowded)} & Basic ACO & 36.63 $\pm$ 2.35 & 1.830 \\
+         & New Algorithm Flow (O6) & 23.96 $\pm$ 1.13 & 1.392 \\
+        \hline
+        \multirow{2}{*}{map d (Maze-like)} & Basic ACO & 86.47 $\pm$ 10.85 & 5.004 \\
+         & New Algorithm Flow (O6) & 60.91 $\pm$ 8.51 & 2.978 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The experimental results show that the restructured flow (O6) improves path quality and often reduces computation time, with the largest gains in crowded and maze-like environments.
+
+\subsubsection*{\textbullet\ Simple Environment (Map a)}
+O6 consistently attains the optimum (5.24 $\pm$ 0.00) with slightly lower runtime (0.276 s) versus Basic ACO (6.12 $\pm$ 0.67, 0.302 s).
+
+\subsubsection*{\textbullet\ Cluttered Environment (Map b)}
+O6 achieves shorter mean paths (82.83) but with higher variance (±20.03) and a modest runtime increase (5.729 s) compared to Basic (88.52 ± 8.51, 5.130 s), reflecting exploration–exploitation trade-offs.
+
+\subsubsection*{\textbullet\ Crowded Environment (Map c)}
+Clear improvements: 23.96 ± 1.13 vs. 36.63 ± 2.35, with faster execution (1.392 s vs. 1.830 s), indicating efficient convergence.
+
+\subsubsection*{\textbullet\ Maze-like Environment (Map d)}
+Substantial gains: 60.91 ± 8.51 vs. 86.47 ± 10.85, and faster runtime (2.978 s vs. 5.004 s), highlighting robustness in complex layouts.
+
+\subsubsection*{Summary and Insights}
+The ACO restructuring (O6) provides a stable backbone that, by clarifying control flow and failure recovery, improves mean path length and runtime in most environments. Variance may increase in cluttered scenes due to broader exploration, but overall reliability and efficiency benefit from the reorganized loop and termination logic.
