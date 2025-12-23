@@ -36,6 +36,16 @@
 \usepackage{multirow}
 \usepackage[english]{babel}
 
+% Helpers to keep wide tables from overflowing
+\usepackage{adjustbox}
+% Allow longtable to use the full text width without side margins
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+% Environment to auto-fit a tabular to text width when needed
+\newenvironment{fitwidth}{\begin{adjustbox}{max width=\textwidth}}{\end{adjustbox}}
+% Optional compact table environment: smaller font and tighter columns
+\newenvironment{tighttab}{\small\setlength{\tabcolsep}{4pt}}{\normalsize\setlength{\tabcolsep}{6pt}}
+
 \hypersetup{
     colorlinks,
     citecolor=black,
