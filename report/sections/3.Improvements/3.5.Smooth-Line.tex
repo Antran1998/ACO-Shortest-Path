@@ -14,7 +14,7 @@ where $B_{i,3}(t)$ represents basis functions of degree 3. Specific smoothing fa
 B-Spline interpolation enhances path efficiency by allowing the robot to cut corners at obstacle edges, resulting in a physically shorter traversal distance. The removal of sharp turns ensures the trajectory is highly compatible with vehicle dynamics and practical navigation requirements.
 
 \subsection{Experimental results}  
-The smoothing algorithm was applied to the discrete paths generated in four different map environments. As summarized in Table~\ref{tab:results_smoothing}, the post-processing step consistently reduced the path length while preserving collision-free trajectories. For example, in Map~3, the path length was reduced from 50.94~m to 49.29~m, demonstrating the effectiveness of the proposed smoothing method in complex environments.
+The smoothing algorithm was applied to the discrete paths generated in four maps. As summarized in Table~\ref{tab:results_smoothing}, the post-processing step consistently reduced the path length while preserving collision-free trajectories.
 
 \begin{table}[H]
 \centering
@@ -22,15 +22,15 @@ The smoothing algorithm was applied to the discrete paths generated in four diff
 \label{tab:results_smoothing}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
-\textbf{Map Name (Description)} & \textbf{Discrete (m)} & \textbf{Smoothed (m)} & \textbf{Reduction (m)} & \textbf{Improvement (\%)} \\
+\textbf{Map Name} & \textbf{Discrete (m)} & \textbf{Smoothed (m)} & \textbf{Reduction (m)} & \textbf{Improvement (\%)} \\
 \hline
-Map a (Simple) & 5.24 & 5.22 & 0.02 & 0.38\% \\
+Map a & 5.24 & 5.22 & 0.02 & 0.38\% \\
 \hline
-Map b (Complex) & 50.94 & 49.29 & 1.65 & 3.24\% \\
+Map b & 50.94 & 49.29 & 1.65 & 3.24\% \\
 \hline
-Map c (Medium) & 22.97 & 22.03 & 0.94 & 4.09\% \\
+Map c & 22.97 & 22.03 & 0.94 & 4.09\% \\
 \hline
-Map d (Medium) & 49.14 & 48.36 & 0.78 & 1.59\% \\
+Map d & 49.14 & 48.36 & 0.78 & 1.59\% \\
 \hline
 \end{tabular}
 \end{table}

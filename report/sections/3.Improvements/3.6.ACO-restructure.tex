@@ -48,14 +48,6 @@ Improved combined performance (balanced quality, runtime, and consistency) by:
 \end{figure}
 
 \subsection{Experimental Results}
-The four test maps used in the experiments correspond to different types of environments:
-\begin{itemize}
-    \item \textbf{Map a}: Simple environment
-    \item \textbf{Map b}: Cluttered environment
-    \item \textbf{Map c}: Crowded environment
-    \item \textbf{Map d}: Maze-like environment
-\end{itemize}
-
 We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New Algorithm Flow (O6)) on four maps using average path length (Mean Len, with standard deviation) and computation time. The results are summarized in Table~\ref{tab:restructure-results}.
 
 % Visualization for Map a
@@ -136,18 +128,18 @@ We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New 
     \label{tab:restructure-results}
     \begin{tabular}{|c|c|c|c|}
         \hline
-        \textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \textbf{Map Name} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
         \hline
-        \multirow{2}{*}{map a (Simple)} & Basic ACO & 6.12 $\pm$ 0.67 & 0.302 \\
+        \multirow{2}{*}{Map a} & Basic ACO & 6.12 $\pm$ 0.67 & 0.302 \\
          & New Algorithm Flow (O6) & 5.24 $\pm$ 0.00 & 0.276 \\
         \hline
-        \multirow{2}{*}{map b (Cluttered)} & Basic ACO & 88.52 $\pm$ 8.51 & 5.130 \\
+        \multirow{2}{*}{Map b} & Basic ACO & 88.52 $\pm$ 8.51 & 5.130 \\
          & New Algorithm Flow (O6) & 82.83 $\pm$ 20.03 & 5.729 \\
         \hline
-        \multirow{2}{*}{map c (Crowded)} & Basic ACO & 36.63 $\pm$ 2.35 & 1.830 \\
+        \multirow{2}{*}{Map c} & Basic ACO & 36.63 $\pm$ 2.35 & 1.830 \\
          & New Algorithm Flow (O6) & 23.96 $\pm$ 1.13 & 1.392 \\
         \hline
-        \multirow{2}{*}{map d (Maze-like)} & Basic ACO & 86.47 $\pm$ 10.85 & 5.004 \\
+        \multirow{2}{*}{Map d} & Basic ACO & 86.47 $\pm$ 10.85 & 5.004 \\
          & New Algorithm Flow (O6) & 60.91 $\pm$ 8.51 & 2.978 \\
         \hline
     \end{tabular}
@@ -155,17 +147,17 @@ We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New 
 
 The experimental results show that the restructured flow (O6) improves path quality and often reduces computation time, with the largest gains in crowded and maze-like environments.
 
-\subsubsection*{\textbullet\ Simple Environment (Map a)}
+\subsubsection*{Map a}
 O6 consistently attains the optimum (5.24 $\pm$ 0.00) with slightly lower runtime (0.276 s) versus Basic ACO (6.12 $\pm$ 0.67, 0.302 s).
 
-\subsubsection*{\textbullet\ Cluttered Environment (Map b)}
-O6 achieves shorter mean paths (82.83) but with higher variance (±20.03) and a modest runtime increase (5.729 s) compared to Basic (88.52 ± 8.51, 5.130 s), reflecting exploration–exploitation trade-offs.
+\subsubsection*{Map b}
+O6 achieves shorter mean paths (82.83) but with higher variance (±20.03) and a modest runtime increase (5.729 s).
 
-\subsubsection*{\textbullet\ Crowded Environment (Map c)}
-Clear improvements: 23.96 ± 1.13 vs. 36.63 ± 2.35, with faster execution (1.392 s vs. 1.830 s), indicating efficient convergence.
+\subsubsection*{Map c}
+Clear improvements: 23.96 ± 1.13 vs. 36.63 ± 2.35, with faster execution (1.392 s vs. 1.830 s).
 
-\subsubsection*{\textbullet\ Maze-like Environment (Map d)}
-Substantial gains: 60.91 ± 8.51 vs. 86.47 ± 10.85, and faster runtime (2.978 s vs. 5.004 s), highlighting robustness in complex layouts.
+\subsubsection*{Map d}
+Substantial gains: 60.91 ± 8.51 vs. 86.47 ± 10.85, and faster runtime (2.978 s vs. 5.004 s).
 
 \subsubsection*{Summary and Insights}
-The ACO restructuring (O6) provides a stable backbone that, by clarifying control flow and failure recovery, improves mean path length and runtime in most environments. Variance may increase in cluttered scenes due to broader exploration, but overall reliability and efficiency benefit from the reorganized loop and termination logic.
+The ACO restructuring (O6) provides a stable backbone that improves mean path length and runtime in most environments.

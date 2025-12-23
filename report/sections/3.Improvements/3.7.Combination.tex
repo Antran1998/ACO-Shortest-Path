@@ -16,14 +16,6 @@ The combined method aims to:
 \end{itemize}
 
 \subsection{Experimental Results}
-The four test maps correspond to different environments:
-\begin{itemize}
-    \item \textbf{Map a}: Simple
-    \item \textbf{Map b}: Cluttered
-    \item \textbf{Map c}: Crowded
-    \item \textbf{Map d}: Maze-like
-\end{itemize}
-
 We compare Basic ACO, individual improvements (O1--O6), and the full combination (Proposed Method (Full)). Metrics are mean path length (with standard deviation) and computation time; best values per map are highlighted in bold. Results are summarized in Table~\ref{tab:combination-results}.
 
 \begin{table}[H]
@@ -32,9 +24,9 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
     \label{tab:combination-results}
     \begin{tabular}{|c|c|c|c|}
         \hline
-        \textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+        \textbf{Map Name} & \textbf{Algorithm} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
         \hline
-        \multirow{8}{*}{map a (Simple)} 
+        \multirow{8}{*}{Map a} 
             & Basic ACO & 6.04 $\pm$ 0.64 & 0.209 \\
             & Cone Pheromone (O1) & 5.24 $\pm$ 0.00 & 0.180 \\
             & Adaptive Heuristic (O2) & \textbf{5.24 $\pm$ 0.00} & \textbf{0.170} \\
@@ -44,7 +36,7 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & New Algorithm Flow (O6) & 5.24 $\pm$ 0.00 & 0.183 \\
             & \textbf{Proposed Method (Full)} & \textbf{5.24 $\pm$ 0.00} & 0.198 \\
         \hline
-        \multirow{8}{*}{map b (Cluttered)} 
+        \multirow{8}{*}{Map b} 
             & Basic ACO & 88.48 $\pm$ 6.95 & 3.056 \\
             & Cone Pheromone (O1) & \textbf{49.21 $\pm$ 1.68} & \textbf{2.025} \\
             & Adaptive Heuristic (O2) & 86.27 $\pm$ 23.06 & 3.263 \\
@@ -54,7 +46,7 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & New Algorithm Flow (O6) & 89.73 $\pm$ 25.78 & 3.939 \\
             & \textbf{Proposed Method (Full)} & 52.19 $\pm$ 2.15 & 2.629 \\
         \hline
-        \multirow{8}{*}{map c (Crowded)} 
+        \multirow{8}{*}{Map c} 
             & Basic ACO & 37.11 $\pm$ 2.37 & 1.300 \\
             & Cone Pheromone (O1) & \textbf{23.20 $\pm$ 0.32} & 0.764 \\
             & Adaptive Heuristic (O2) & 23.72 $\pm$ 1.01 & 0.777 \\
@@ -64,7 +56,7 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & New Algorithm Flow (O6) & 23.96 $\pm$ 1.48 & 0.802 \\
             & \textbf{Proposed Method (Full)} & 23.95 $\pm$ 1.38 & 0.926 \\
         \hline
-        \multirow{8}{*}{map d (Maze-like)} 
+        \multirow{8}{*}{Map d} 
             & Basic ACO & 85.08 $\pm$ 9.43 & 3.119 \\
             & Cone Pheromone (O1) & 47.98 $\pm$ 2.31 & \textbf{1.442} \\
             & Adaptive Heuristic (O2) & 61.19 $\pm$ 9.80 & 1.740 \\
@@ -79,17 +71,17 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
 
 The combined method delivers strong and stable performance overall, often near the best path quality while keeping runtime competitive.
 
-\subsubsection*{\textbullet\ Simple Environment (Map a)}
-All improvements reach the optimal path (5.24 $\pm$ 0.00). The full combination is close to the fastest variants (O2/O1), with negligible overhead.
+\subsubsection*{Map a}
+All improvements reach the optimal path (5.24 $\pm$ 0.00). The full combination is close to the fastest variants.
 
-\subsubsection*{\textbullet\ Cluttered Environment (Map b)}
-Cone initialization (O1) attains the best mean length (49.21). The combined method remains near-optimal (52.19) and far better than Basic ACO, with moderate runtime.
+\subsubsection*{Map b}
+Cone initialization (O1) attains the best mean length (49.21). The combined method remains near-optimal (52.19) with moderate runtime.
 
-\subsubsection*{\textbullet\ Crowded Environment (Map c)}
-O1/O3 slightly edge the best mean lengths, while the combined method is close (23.95) with acceptable time. Gains over Basic ACO are substantial.
+\subsubsection*{Map c}
+O1/O3 slightly edge the best mean lengths, while the combined method is close (23.95) with acceptable time.
 
-\subsubsection*{\textbullet\ Maze-like Environment (Map d)}
-The combined method is effectively tied with the best single components (O1/O4) on mean length (48.06 vs.\ 47.92--47.98) and remains near the fastest runtime.
+\subsubsection*{Map d}
+The combined method is effectively tied with the best single components (O1/O4) on mean length and remains near the fastest runtime.
 
 \subsubsection*{Summary and Insights}
-Across all maps, the \emph{Proposed Method (Full)} consistently improves over Basic ACO and matches or approaches the best single-component results, with notably low variance in complex maps (e.g., Map b: $\pm$2.15 vs.\ $\pm$25.78 for O6). This indicates that coordinated integration of O1--O6 provides robust, high-quality paths with competitive efficiency.
+Across all maps, the \emph{Proposed Method (Full)} consistently improves over Basic ACO and matches or approaches the best single-component results.

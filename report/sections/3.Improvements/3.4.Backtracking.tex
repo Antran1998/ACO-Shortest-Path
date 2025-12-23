@@ -42,7 +42,7 @@ The backtracking mechanism provides several key advantages:
 \textbf{Adaptive Learning:} The global tabu list enables colony-level learning, where information about structural deadlocks is shared across all ants, preventing redundant failures.
 
 \subsection{Experimental results}
-The backtracking mechanism was evaluated on four benchmark maps with varying complexity levels, ranging from simple (Map 1: $5 \times 5$) to complex environments (Map 3: $31 \times 31$). Each configuration was tested with 30 independent runs using standard parameters: 50 ants, 100 iterations, evaporation rate of 0.15, and initial pheromone concentration of $1 \times 10^{-4}$. Table~\ref{tab:backtracking_results} presents the comparative performance of backtracking against the baseline ACO.
+The backtracking mechanism was evaluated on four benchmark maps. Each configuration was tested with 30 independent runs using standard parameters: 50 ants, 100 iterations, evaporation rate of 0.15, and initial pheromone concentration of $1 \times 10^{-4}$. Table~\ref{tab:backtracking_results} presents the comparative performance of backtracking against the baseline ACO.
 
 \begin{table}[H]
 \centering
@@ -50,35 +50,27 @@ The backtracking mechanism was evaluated on four benchmark maps with varying com
 \label{tab:backtracking_results}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
-\textbf{Map Name (Description)} & \textbf{Algorithm} & \textbf{Minimum path length} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
+\textbf{Map Name} & \textbf{Algorithm} & \textbf{Minimum path length} & \textbf{Mean path length} & \textbf{Computational time (s)} \\
 \hline
-\multirow{2}{*}{Map 1 (Simple)} & Base ACO & 5.24 & $5.24 \pm 0.00$ & 0.110 \\
+\multirow{2}{*}{Map a} & Base ACO & 5.24 & $5.24 \pm 0.00$ & 0.110 \\
  & Backtracking & 5.24 & $5.24 \pm 0.00$ & 0.127 \\
 \hline
-\multirow{2}{*}{Map 3 (Complex)} & Base ACO & 46.11 & $47.77 \pm 1.08$ & 1.980 \\
+\multirow{2}{*}{Map b} & Base ACO & 46.11 & $47.77 \pm 1.08$ & 1.980 \\
  & Backtracking & 46.11 & $52.59 \pm 3.73$ & 2.546 \\
 \hline
-\multirow{2}{*}{Map 7 (Medium)} & Base ACO & 44.21 & $44.59 \pm 0.50$ & 1.388 \\
+\multirow{2}{*}{Map c} & Base ACO & 44.21 & $44.59 \pm 0.50$ & 1.388 \\
  & Backtracking & 44.21 & $47.23 \pm 2.93$ & 1.541 \\
 \hline
-\multirow{2}{*}{Map 8 (Medium)} & Base ACO & 22.97 & $22.98 \pm 0.08$ & 0.653 \\
+\multirow{2}{*}{Map d} & Base ACO & 22.97 & $22.98 \pm 0.08$ & 0.653 \\
  & Backtracking & 22.97 & $23.08 \pm 0.26$ & 0.792 \\
 \hline
 \end{tabular}
 \end{table}
 
-\textbf{Path Quality Analysis:} The results reveal an important trade-off characteristic of the backtracking mechanism. Across all benchmark maps, backtracking preserves optimal minimum path length—matching the baseline's best solutions exactly (5.24m, 46.11m, 44.21m, and 22.97m respectively). This demonstrates that the mechanism does not compromise solution quality when it successfully finds paths. However, the mean path length shows notable degradation, particularly on complex maps: Map 3 experiences a 10.1\% increase in mean length ($47.77 \rightarrow 52.59$m) with variance rising from $\pm1.08$ to $\pm3.73$, while Map 7 shows a 5.9\% increase ($44.59 \rightarrow 47.23$m) with variance expanding from $\pm0.50$ to $\pm2.93$.
+\textbf{Path Quality Analysis:} Backtracking preserves optimal minimum path length across all maps but shows degraded mean path length in complex environments.
 
-\textbf{Variance and Stability:} The substantially increased standard deviation in complex environments (Map 3: 3.5× increase, Map 7: 5.9× increase) indicates reduced result consistency. This behavior stems from the stochastic nature of backtracking decisions: when ants encounter dead-ends, the decision stack may lead them to explore significantly different corridor alternatives, resulting in paths of varying quality. In contrast, simpler maps (Map 1, Map 8) show minimal variance increase, suggesting that backtracking's exploratory overhead is most pronounced in environments with multiple competing path candidates.
+\textbf{Variance and Stability:} Increased standard deviation indicates reduced consistency on complex maps due to stochastic backtracking decisions.
 
-\textbf{Computational Overhead:} The backtracking mechanism introduces measurable but acceptable runtime overhead across all maps: +15.5\% (Map 1), +28.6\% (Map 3), +11.0\% (Map 7), and +21.3\% (Map 8). This overhead scales with environment complexity, as more intricate obstacle configurations trigger more frequent backtracking operations. The decision stack management, path restoration, and tabu list lookups collectively contribute to this increased computation time. Notably, the overhead remains sub-linear relative to the map complexity increase, confirming the theoretical $\mathcal{O}(1)$ amortized cost per node visit.
+\textbf{Computational Overhead:} The mechanism introduces 15--30\% runtime overhead; overhead scales with environment complexity.
 
-\textbf{Performance Trade-offs and Applicability:} The experimental results indicate that standalone backtracking is not universally beneficial. While it successfully prevents complete search failures by enabling ants to recover from dead-ends—thereby maintaining 100\% success rate across all tested maps—it does so at the cost of reduced path quality consistency and increased runtime. The mechanism is most valuable in scenarios where:
-
-\begin{itemize}
-    \item \textit{Success rate is critical}: Environments with extremely narrow passages where baseline ACO frequently fails to find any solution.
-    \item \textit{Real-time constraints are relaxed}: Applications that can tolerate 15-30\% longer computation time in exchange for guaranteed path discovery.
-    \item \textit{Combined with complementary improvements}: As demonstrated in the Proposed Method configuration (Section 3.7), backtracking shows improved behavior when integrated with cone pheromone initialization and adaptive processing, which help guide the backtracking search toward more promising corridors.
-\end{itemize}
-
-\textbf{Synergy with Other Improvements:} Examining the Proposed Method results (which combines all improvements including backtracking) reveals partial recovery from standalone backtracking's weaknesses. On Map 3, the combined approach achieves mean length of $50.30 \pm 1.94$m—still elevated compared to baseline ($47.77 \pm 1.08$m) but substantially better than standalone backtracking ($52.59 \pm 3.73$m). This suggests that cone pheromone initialization and adaptive factors help constrain backtracking's exploratory variance while retaining its deadlock-recovery benefits. The division of labor mechanism, with its soldier/king role specialization, provides diverse decision points that backtracking can exploit more effectively than uniform ant populations.
+\textbf{Performance Trade-offs and Applicability:} Standalone backtracking is most valuable when success rate is critical or combined with complementary improvements.
