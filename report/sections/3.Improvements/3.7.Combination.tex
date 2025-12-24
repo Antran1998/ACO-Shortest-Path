@@ -57,7 +57,7 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & New Algorithm Flow (O6) & 62.75 $\pm$ 11.02 & 1.740 \\
             & \textbf{Proposed Method (Full)} & 46.26 $\pm$ 2.05 & 1.503 \\
         \hline
-                \multirow{8}{*}{Map d} 
+        \multirow{8}{*}{Map d} 
             & Basic ACO & 37.11 $\pm$ 2.37 & 1.300 \\
             & Cone Pheromone (O1) & \textbf{23.20 $\pm$ 0.32} & 0.764 \\
             & Adaptive Heuristic (O2) & 23.72 $\pm$ 1.01 & 0.777 \\
@@ -69,6 +69,41 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
         \hline
     \end{tabular}
 \end{table}
+
+% Visualization for Proposed Method across maps
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/Propose/visu-map1-proposed_full.png}
+        \caption{Map a - Proposed Method (Full)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/Propose/visu-map3-proposed_full.png}
+        \caption{Map b - Proposed Method (Full)}
+    \end{subfigure}
+    \caption{Visualization of paths with the Proposed Method (Full) on Maps a and b.}
+    \label{fig:proposed-path-visualization-map1-3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/Propose/visu-map7-proposed_full.png}
+        \caption{Map c - Proposed Method (Full)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/Propose/visu-map8-proposed_full.png}
+        \caption{Map d - Proposed Method (Full)}
+    \end{subfigure}
+    \caption{Visualization of paths with the Proposed Method (Full) on Maps c and d.}
+    \label{fig:proposed-path-visualization-map8-7}
+\end{figure}
 
 The combined method delivers strong and stable performance overall, often near the best path quality while keeping runtime competitive.
 

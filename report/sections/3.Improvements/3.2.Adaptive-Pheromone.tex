@@ -74,13 +74,13 @@ To evaluate the effectiveness of the adaptive pheromone and heuristic factor reg
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O2/visu-map8-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O2/visu-map7-basic_aco.png}
         \caption{Map c - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O2/visu-map8-m3-adaptive_heuristic_o2.png}
+        \includegraphics[width=\linewidth]{images/O2/visu-map7-m3-adaptive_heuristic_o2.png}
         \caption{Map c - Adaptive Heuristic (O2)}
     \end{subfigure}
     \caption{Visualization of paths on Map c.}
@@ -92,13 +92,13 @@ To evaluate the effectiveness of the adaptive pheromone and heuristic factor reg
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O2/visu-map7-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O2/visu-map8-basic_aco.png}
         \caption{Map d - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O2/visu-map7-m3-adaptive_heuristic_o2.png}
+        \includegraphics[width=\linewidth]{images/O2/visu-map8-m3-adaptive_heuristic_o2.png}
         \caption{Map d - Adaptive Heuristic (O2)}
     \end{subfigure}
     \caption{Visualization of paths on Map d.}
@@ -119,11 +119,11 @@ To evaluate the effectiveness of the adaptive pheromone and heuristic factor reg
     \multirow{2}{*}{Map b} & Basic ACO & 87.67 $\pm$ 8.41 & 2.278 \\
      & Adaptive (O2) & 90.34 $\pm$ 27.88 & 2.809 \\
         \hline
-    \multirow{2}{*}{Map c} & Basic ACO & 36.67 $\pm$ 1.91 & 0.703 \\
-     & Adaptive (O2) & 24.18 $\pm$ 1.60 & 0.611 \\
-        \hline
-    \multirow{2}{*}{Map d} & Basic ACO & 85.30 $\pm$ 10.49 & 2.376 \\
+    \multirow{2}{*}{Map c} & Basic ACO & 85.30 $\pm$ 10.49 & 2.376 \\
      & Adaptive (O2) & 63.34 $\pm$ 13.97 & 1.790 \\
+        \hline
+    \multirow{2}{*}{Map d} & Basic ACO & 36.67 $\pm$ 1.91 & 0.703 \\
+     & Adaptive (O2) & 24.18 $\pm$ 1.60 & 0.611 \\
         \hline
     \end{tabular}
 \end{table}
@@ -137,10 +137,10 @@ Both algorithms easily find the optimal path, but O2 converges more quickly and 
 The mean path length for O2 is comparable to Basic ACO, but the higher standard deviation reflects increased difficulty.
 
 \subsubsection*{Map c}
-O2 is especially effective, almost always finding the optimal path.
+O2 achieves a much lower mean path length than Basic ACO, demonstrating a clear advantage.
 
 \subsubsection*{Map d}
-O2 achieves a much lower mean path length than Basic ACO, demonstrating a clear advantage.
+O2 is especially effective, almost always finding the optimal path.
 
 \subsubsection*{Summary and Insights}
 Across all maps, O2 reduces variance and maintains similar computation time.

@@ -91,13 +91,13 @@ We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New 
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O6/visu-map8-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O6/visu-map7-basic_aco.png}
         \caption{Map c - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O6/visu-map8-m7-new_algorithm_flow_o6.png}
+        \includegraphics[width=\linewidth]{images/O6/visu-map7-m7-new_algorithm_flow_o6.png}
         \caption{Map c - New Algorithm Flow (O6)}
     \end{subfigure}
     \caption{Visualization of paths on Map c.}
@@ -109,13 +109,13 @@ We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New 
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O6/visu-map7-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O6/visu-map8-basic_aco.png}
         \caption{Map d - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O6/visu-map7-m7-new_algorithm_flow_o6.png}
+        \includegraphics[width=\linewidth]{images/O6/visu-map8-m7-new_algorithm_flow_o6.png}
         \caption{Map d - New Algorithm Flow (O6)}
     \end{subfigure}
     \caption{Visualization of paths on Map d.}
@@ -136,11 +136,11 @@ We compare the standard ACO (Basic ACO) to the restructured algorithm flow (New 
         \multirow{2}{*}{Map b} & Basic ACO & 88.52 $\pm$ 8.51 & 5.130 \\
          & New Algorithm Flow (O6) & 82.83 $\pm$ 20.03 & 5.729 \\
         \hline
-        \multirow{2}{*}{Map c} & Basic ACO & 36.63 $\pm$ 2.35 & 1.830 \\
-         & New Algorithm Flow (O6) & 23.96 $\pm$ 1.13 & 1.392 \\
-        \hline
-        \multirow{2}{*}{Map d} & Basic ACO & 86.47 $\pm$ 10.85 & 5.004 \\
+        \multirow{2}{*}{Map c} & Basic ACO & 86.47 $\pm$ 10.85 & 5.004 \\
          & New Algorithm Flow (O6) & 60.91 $\pm$ 8.51 & 2.978 \\
+        \hline
+        \multirow{2}{*}{Map d} & Basic ACO & 36.63 $\pm$ 2.35 & 1.830 \\
+         & New Algorithm Flow (O6) & 23.96 $\pm$ 1.13 & 1.392 \\
         \hline
     \end{tabular}
 \end{table}
@@ -154,10 +154,10 @@ O6 consistently attains the optimum (5.24 $\pm$ 0.00) with slightly lower runtim
 O6 achieves shorter mean paths (82.83) but with higher variance (±20.03) and a modest runtime increase (5.729 s).
 
 \subsubsection*{Map c}
-Clear improvements: 23.96 ± 1.13 vs. 36.63 ± 2.35, with faster execution (1.392 s vs. 1.830 s).
+Substantial gains: 60.91 ± 8.51 vs. 86.47 ± 10.85, and faster runtime (2.978 s vs. 5.004 s).
 
 \subsubsection*{Map d}
-Substantial gains: 60.91 ± 8.51 vs. 86.47 ± 10.85, and faster runtime (2.978 s vs. 5.004 s).
+Clear improvements: 23.96 ± 1.13 vs. 36.63 ± 2.35, with faster execution (1.392 s vs. 1.830 s).
 
 \subsubsection*{Summary and Insights}
 The ACO restructuring (O6) provides a stable backbone that improves mean path length and runtime in most environments.

@@ -68,13 +68,13 @@ We compare the standard ACO (Basic ACO) to the cone-biased initialization (Cone 
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O1/visu-map8-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O1/visu-map7-basic_aco.png}
         \caption{Map c - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O1/visu-map8-m2-cone_pheromone_o1.png}
+        \includegraphics[width=\linewidth]{images/O1/visu-map7-m2-cone_pheromone_o1.png}
         \caption{Map c - Cone Pheromone (O1)}
     \end{subfigure}
     \caption{Visualization of paths on Map c.}
@@ -86,13 +86,13 @@ We compare the standard ACO (Basic ACO) to the cone-biased initialization (Cone 
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O1/visu-map7-basic_aco.png}
+        \includegraphics[width=\linewidth]{images/O1/visu-map8-basic_aco.png}
         \caption{Map d - Basic ACO}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{images/O1/visu-map7-m2-cone_pheromone_o1.png}
+        \includegraphics[width=\linewidth]{images/O1/visu-map8-m2-cone_pheromone_o1.png}
         \caption{Map d - Cone Pheromone (O1)}
     \end{subfigure}
     \caption{Visualization of paths on Map d.}
@@ -131,10 +131,10 @@ Both methods reach the optimal corridor; O1 is consistently optimal (5.24 $\pm$ 
 O1 finds much shorter paths (49.58 $\pm$ 1.59) than Basic ACO (89.15 $\pm$ 7.56) and is faster on average (4.075 s vs. 5.766 s), showing strong guidance without over-bias.
 
 \subsubsection*{Map c}
-O1 is markedly better (23.26 $\pm$ 0.34) than Basic ACO (37.30 $\pm$ 2.06) and also faster (1.469 s vs. 2.158 s), indicating faster convergence with lower variance.
+O1 significantly outperforms the baseline (48.02 $\pm$ 2.17 vs. 85.11 $\pm$ 10.29) with lower time (2.645 s vs. 5.603 s), demonstrating robustness in complex layouts.
 
 \subsubsection*{Map d}
-O1 significantly outperforms the baseline (48.02 $\pm$ 2.17 vs. 85.11 $\pm$ 10.29) with lower time (2.645 s vs. 5.603 s), demonstrating robustness in complex layouts.
+O1 is markedly better (23.26 $\pm$ 0.34) than Basic ACO (37.30 $\pm$ 2.06) and also faster (1.469 s vs. 2.158 s), indicating faster convergence with lower variance.
 
 \subsubsection*{Summary and Insights}
 The cone-shaped initialization improves both mean path length and stability across all maps, with notable gains in challenging environments. Guidance from the cone field accelerates early exploration toward promising regions while preserving diversity, leading to shorter paths and competitive or better runtimes.
