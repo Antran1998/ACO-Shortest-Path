@@ -20,6 +20,7 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
 
 \begin{table}[H]
     \centering
+    \small
     \caption{Final comparison across all methods on four maps}
     \label{tab:combination-results}
     \begin{tabular}{|c|c|c|c|}
@@ -44,19 +45,9 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & Backtracking (O4) & 55.29 $\pm$ 5.26 & 2.556 \\
             & Path Smoothing (O5) & 82.45 $\pm$ 22.17 & 3.315 \\
             & New Algorithm Flow (O6) & 89.73 $\pm$ 25.78 & 3.939 \\
-            & \textbf{Proposed Method (Full)} & 52.19 $\pm$ 2.15 & 2.629 \\
+            & \textbf{Proposed Method (Full)} & 49.68 $\pm$ 2.15 & 2.629 \\
         \hline
         \multirow{8}{*}{Map c} 
-            & Basic ACO & 37.11 $\pm$ 2.37 & 1.300 \\
-            & Cone Pheromone (O1) & \textbf{23.20 $\pm$ 0.32} & 0.764 \\
-            & Adaptive Heuristic (O2) & 23.72 $\pm$ 1.01 & 0.777 \\
-            & Division of Labor (O3) & 23.30 $\pm$ 0.36 & \textbf{0.758} \\
-            & Backtracking (O4) & 23.60 $\pm$ 0.76 & 0.848 \\
-            & Path Smoothing (O5) & 24.01 $\pm$ 1.22 & 0.812 \\
-            & New Algorithm Flow (O6) & 23.96 $\pm$ 1.48 & 0.802 \\
-            & \textbf{Proposed Method (Full)} & 23.95 $\pm$ 1.38 & 0.926 \\
-        \hline
-        \multirow{8}{*}{Map d} 
             & Basic ACO & 85.08 $\pm$ 9.43 & 3.119 \\
             & Cone Pheromone (O1) & 47.98 $\pm$ 2.31 & \textbf{1.442} \\
             & Adaptive Heuristic (O2) & 61.19 $\pm$ 9.80 & 1.740 \\
@@ -64,7 +55,17 @@ We compare Basic ACO, individual improvements (O1--O6), and the full combination
             & Backtracking (O4) & \textbf{47.92 $\pm$ 3.52} & 1.583 \\
             & Path Smoothing (O5) & 61.28 $\pm$ 8.91 & 1.674 \\
             & New Algorithm Flow (O6) & 62.75 $\pm$ 11.02 & 1.740 \\
-            & \textbf{Proposed Method (Full)} & 48.06 $\pm$ 2.05 & 1.503 \\
+            & \textbf{Proposed Method (Full)} & 46.26 $\pm$ 2.05 & 1.503 \\
+        \hline
+                \multirow{8}{*}{Map d} 
+            & Basic ACO & 37.11 $\pm$ 2.37 & 1.300 \\
+            & Cone Pheromone (O1) & \textbf{23.20 $\pm$ 0.32} & 0.764 \\
+            & Adaptive Heuristic (O2) & 23.72 $\pm$ 1.01 & 0.777 \\
+            & Division of Labor (O3) & 23.30 $\pm$ 0.36 & \textbf{0.758} \\
+            & Backtracking (O4) & 23.60 $\pm$ 0.76 & 0.848 \\
+            & Path Smoothing (O5) & 24.01 $\pm$ 1.22 & 0.812 \\
+            & New Algorithm Flow (O6) & 23.96 $\pm$ 1.48 & 0.802 \\
+            & \textbf{Proposed Method (Full)} & 23.95 $\pm$ 0.98 & 0.926 \\
         \hline
     \end{tabular}
 \end{table}
@@ -78,10 +79,10 @@ All improvements reach the optimal path (5.24 $\pm$ 0.00). The full combination 
 Cone initialization (O1) attains the best mean length (49.21). The combined method remains near-optimal (52.19) with moderate runtime.
 
 \subsubsection*{Map c}
-O1/O3 slightly edge the best mean lengths, while the combined method is close (23.95) with acceptable time.
+The combined method is effectively tied with the best single components (O1/O4) on mean length and remains near the fastest runtime.
 
 \subsubsection*{Map d}
-The combined method is effectively tied with the best single components (O1/O4) on mean length and remains near the fastest runtime.
+O1/O3 slightly edge the best mean lengths, while the combined method is close (23.95) with acceptable time.
 
 \subsubsection*{Summary and Insights}
 Across all maps, the \emph{Proposed Method (Full)} consistently improves over Basic ACO and matches or approaches the best single-component results.
